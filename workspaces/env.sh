@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 : "${API_PORT:=3000}"
-: "${UI_PORT:=3002}"
+: "${UI_PORT:=3001}"
 : "${API:=http://localhost:$API_PORT}"
 : "${UI:=http://localhost:$UI_PORT}"
 

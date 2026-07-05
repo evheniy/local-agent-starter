@@ -19,4 +19,4 @@ echo "Manifest:
 $API/manifest.yml
 "
 
-NODE_ENV=production LOG_LEVEL=info PORT=$API_PORT tsx watch $scriptdir/index.tsx
+NODE_ENV=production LOG_LEVEL=info PORT=$API_PORT tsx watch $scriptdir/index.ts
