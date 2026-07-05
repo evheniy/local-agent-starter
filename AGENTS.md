@@ -13,6 +13,8 @@ being adapted into a local RAG/agent project.
   `workspaces/static`, and `workspaces/ui`.
 - Project documentation lives in `docs/`; screenshots are kept in
   `docs/screenshots`.
+- The main UI is `AgentShell`, a local agent/RAG shell with Chat and Upload
+  tabs.
 
 ## Commands
 
@@ -31,6 +33,8 @@ being adapted into a local RAG/agent project.
   `./dist/api` using `../../workspaces/api/Dockerfile`.
 - The `api` service is exposed on `${API_PORT:-3000}:3000` and waits for
   healthy Postgres.
+- The `api` service mounts `./docker/docs` to `/app/docs` for uploaded demo
+  documents.
 - Postgres image: `pgvector/pgvector:pg18`.
 - Postgres data uses the `postgres-data` Docker named volume mounted at
   `/var/lib/postgresql`. This mount path matters for PostgreSQL 18 images.
@@ -63,3 +67,5 @@ being adapted into a local RAG/agent project.
 - Do not commit runtime data, generated database files, or local secrets.
 - After changing any YAML/YML file, run `yarn lint:eslint`; the ESLint config
   validates YAML files and catches issues such as empty mapping values.
+- The trace panel must be described as visible application-level trace, not
+  hidden model thoughts.

@@ -12,6 +12,8 @@ services:
       NODE_ENV: production
     ports:
       - '${API_PORT}:3000'
+    volumes:
+      - ./docker/docs:/app/docs
     depends_on:
       postgres:
         condition: service_healthy

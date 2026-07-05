@@ -1,47 +1,33 @@
 # Components
 
-Reusable React components for the profile-card demo. The package is private to
-this repository and is consumed by the API and UI workspaces.
+Reusable React components for the local agent starter. The package is private
+to this repository and is consumed by the API and UI workspaces.
 
 ## Exports
 
 Import the full public surface from `@p/components`:
 
-- `Avatar`
-- `Badge`
-- `ButtonLink`
-- `Card`
-- `IconLink`
-- `ProfileCard`
-- `ProfileDetails`
-- `ProfileHeader`
-- `ProfileLinks`
-- `ProfileMeta`
-- `ProfileTags`
+- `AgentShell`
+- `AgentTabs`
+- `ChatPanel`
+- `FileUploadPanel`
+- `IndexedFilesList`
+- `RetrievedChunks`
+- `TracePanel`
 
 Focused component entry points are also available:
 
 ```tsx
-import { ProfileCard } from '@p/components/profile-card';
+import { AgentShell } from '@p/components/agent-shell';
 ```
 
 ## Usage
 
 ```tsx
-import { ProfileCard } from '@p/components/profile-card';
+import { AgentShell } from '@p/components/agent-shell';
 import '@p/components/styles.scss';
 
-export const Example = () => (
-  <ProfileCard
-    name="Developer"
-    title="Senior IT Professional"
-    description="Building calm architecture for cloud-ready applications."
-    avatarUrl="http://localhost:3001/avatar.svg"
-    tags={['React', 'TypeScript', 'Vyriy']}
-    meta={[{ label: 'Project', value: 'Fullstack preset' }]}
-    links={[{ href: 'https://vyriy.dev', label: 'Website', external: true }]}
-  />
-);
+export const Example = () => <AgentShell />;
 ```
 
 ## Structure

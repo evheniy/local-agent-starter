@@ -1,0 +1,15 @@
+import { Meta, Markdown, Canvas } from '@storybook/addon-docs/blocks';
+import ReadMe from './README.md?raw';
+
+import * as ChatPanelStories from './chat-panel.stories';
+
+<Meta of={ChatPanelStories} />
+
+<Markdown>{ReadMe}</Markdown>
+
+## Examples
+
+<Canvas of={ChatPanelStories.Default} />
+<Canvas of={ChatPanelStories.Empty} />
+<Canvas of={ChatPanelStories.Loading} />
+<Canvas of={ChatPanelStories.Error} />

@@ -57,10 +57,11 @@ The compose file starts:
   `Local RAG Postgres` server.
 
 Docker init scripts live in `docker/postgres`. pgAdmin server definitions live
-in `docker/pgadmin`. Postgres data is stored in the `postgres-data` Docker
-named volume mounted at `/var/lib/postgresql`, so it persists across
-`docker compose down` without writing database files into the repository.
-Postgres init scripts run only when the named volume is empty.
+in `docker/pgadmin`. Uploaded demo documents are mounted into the API container
+from `docker/docs` at `/app/docs`. Postgres data is stored in the
+`postgres-data` Docker named volume mounted at `/var/lib/postgresql`, so it
+persists across `docker compose down` without writing database files into the
+repository. Postgres init scripts run only when the named volume is empty.
 
 ## Local URLs
 

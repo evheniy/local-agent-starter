@@ -38,3 +38,12 @@ LLM_PROVIDER=lmstudio
 LLM_BASE_URL=http://host.docker.internal:1234/v1
 LLM_MODEL=qwen3-coder
 ```
+
+## UI Modes
+
+The UI has two modes:
+
+1. Chat - ask questions and observe the visible application pipeline.
+2. Upload - select local files that will later be sent to the ingest/indexing API.
+
+The trace panel shows application-level steps, not hidden model thoughts.

@@ -4,7 +4,7 @@ import { createRouter } from '@vyriy/router';
 import { minify, html } from '@vyriy/html';
 import { html as react } from '@vyriy/render';
 
-import { ProfileCard } from '@p/components/profile-card';
+import { AgentShell } from '@p/components/agent-shell';
 import { getUi } from '@p/env';
 
 server(
@@ -14,16 +14,10 @@ server(
         body: minify(
           html({
             htmlAttributes: 'lang="en"',
-            title: '<title>Demo</title>',
+            title: '<title>Local Agent Starter</title>',
             meta: '<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />',
             link: `<link rel="stylesheet" type="text/css" href="${getUi()}/main.css" />`,
-            body: `<div id="root" rendered>${react(
-              <ProfileCard
-                name="Developer"
-                title="Senior IT Professional"
-                avatarUrl="http://localhost:3001/avatar.svg"
-              />,
-            )}</div>`,
+            body: `<div id="root" rendered>${react(<AgentShell />)}</div>`,
             script: `<script defer="defer" src="${getUi()}/index.js"></script>`,
           }),
         ),

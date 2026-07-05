@@ -8,12 +8,6 @@ jest.mock('@vyriy/render/element', () => ({
   element: elementMock,
 }));
 
-type ProfileCardProps = {
-  avatarUrl: string;
-  name: string;
-  title: string;
-};
-
 describe('workspaces/ui/index.tsx', () => {
   const loadEntry = async () => {
     const root = document.createElement('div');
@@ -25,7 +19,7 @@ describe('workspaces/ui/index.tsx', () => {
       await import('./index.js');
     });
 
-    const [{ component }] = elementMock.mock.calls[0] as [{ component: ReactElement<ProfileCardProps> }];
+    const [{ component }] = elementMock.mock.calls[0] as [{ component: ReactElement }];
 
     return {
       root,
@@ -43,16 +37,12 @@ describe('workspaces/ui/index.tsx', () => {
     });
   });
 
-  it('renders the profile card demo component', async () => {
+  it('renders the local agent shell component', async () => {
     const { component } = await loadEntry();
 
     expect(isValidElement(component)).toBe(true);
     expect(typeof component.type).toBe('function');
-    expect((component.type as { name?: string }).name).toBe('ProfileCard');
-    expect(component.props).toEqual({
-      avatarUrl: 'http://localhost:3001/avatar.svg',
-      name: 'Developer',
-      title: 'Senior IT Professional',
-    });
+    expect((component.type as { name?: string }).name).toBe('AgentShell');
+    expect(component.props).toEqual({});
   });
 });

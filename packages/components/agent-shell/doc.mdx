@@ -1,0 +1,13 @@
+import { Meta, Markdown, Canvas } from '@storybook/addon-docs/blocks';
+import ReadMe from './README.md?raw';
+
+import * as AgentShellStories from './agent-shell.stories';
+
+<Meta of={AgentShellStories} />
+
+<Markdown>{ReadMe}</Markdown>
+
+## Examples
+
+<Canvas of={AgentShellStories.Chat} />
+<Canvas of={AgentShellStories.Upload} />

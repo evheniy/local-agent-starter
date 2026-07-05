@@ -7,6 +7,8 @@ The repository uses Yarn workspaces.
 - `packages/components` contains shared React components.
 - `packages/env` contains environment readers.
 - `docker-compose.yml` runs local infrastructure and the built API image.
+- `docker/docs` is mounted into the API container at `/app/docs` for uploaded
+  demo files.
 - `docker/postgres` contains Postgres init scripts.
 - Postgres data uses the `postgres-data` Docker named volume mounted at
   `/var/lib/postgresql`.

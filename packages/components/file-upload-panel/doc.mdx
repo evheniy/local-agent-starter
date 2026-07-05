@@ -1,0 +1,15 @@
+import { Meta, Markdown, Canvas } from '@storybook/addon-docs/blocks';
+import ReadMe from './README.md?raw';
+
+import * as FileUploadPanelStories from './file-upload-panel.stories';
+
+<Meta of={FileUploadPanelStories} />
+
+<Markdown>{ReadMe}</Markdown>
+
+## Examples
+
+<Canvas of={FileUploadPanelStories.Default} />
+<Canvas of={FileUploadPanelStories.Uploading} />
+<Canvas of={FileUploadPanelStories.Success} />
+<Canvas of={FileUploadPanelStories.Error} />

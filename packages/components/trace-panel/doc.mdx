@@ -1,0 +1,14 @@
+import { Meta, Markdown, Canvas } from '@storybook/addon-docs/blocks';
+import ReadMe from './README.md?raw';
+
+import * as TracePanelStories from './trace-panel.stories';
+
+<Meta of={TracePanelStories} />
+
+<Markdown>{ReadMe}</Markdown>
+
+## Examples
+
+<Canvas of={TracePanelStories.WithSampleData} />
+<Canvas of={TracePanelStories.Empty} />
+<Canvas of={TracePanelStories.Error} />

@@ -1,0 +1,64 @@
+.agent-shell {
+  display: grid;
+  gap: 1.5rem;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 2rem;
+  background: #eef2f7;
+  color: #111827;
+}
+
+.agent-shell__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.agent-shell__title,
+.agent-shell__subtitle {
+  margin: 0;
+}
+
+.agent-shell__title {
+  color: #111827;
+  font-size: 2rem;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.agent-shell__subtitle {
+  margin-top: 0.5rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.agent-shell__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.8fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.agent-shell__grid > :first-child {
+  grid-row: span 2;
+}
+
+@media (width <= 800px) {
+  .agent-shell {
+    padding: 1rem;
+  }
+
+  .agent-shell__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .agent-shell__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-shell__grid > :first-child {
+    grid-row: auto;
+  }
+}

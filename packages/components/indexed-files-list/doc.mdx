@@ -1,0 +1,14 @@
+import { Meta, Markdown, Canvas } from '@storybook/addon-docs/blocks';
+import ReadMe from './README.md?raw';
+
+import * as IndexedFilesListStories from './indexed-files-list.stories';
+
+<Meta of={IndexedFilesListStories} />
+
+<Markdown>{ReadMe}</Markdown>
+
+## Examples
+
+<Canvas of={IndexedFilesListStories.WithSampleData} />
+<Canvas of={IndexedFilesListStories.Empty} />
+<Canvas of={IndexedFilesListStories.Error} />

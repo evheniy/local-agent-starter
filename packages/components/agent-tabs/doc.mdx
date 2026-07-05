@@ -1,0 +1,13 @@
+import { Meta, Markdown, Canvas } from '@storybook/addon-docs/blocks';
+import ReadMe from './README.md?raw';
+
+import * as AgentTabsStories from './agent-tabs.stories';
+
+<Meta of={AgentTabsStories} />
+
+<Markdown>{ReadMe}</Markdown>
+
+## Examples
+
+<Canvas of={AgentTabsStories.Default} />
+<Canvas of={AgentTabsStories.Upload} />

@@ -1,19 +1,19 @@
 # API
 
-Server-rendered demo workspace for the profile-card application.
+Server-rendered workspace for the local agent starter application.
 
 ## Behavior
 
 The API starts an `@vyriy/server` handler and serves the root route:
 
-- `GET /` returns an HTML document with a server-rendered `ProfileCard`.
+- `GET /` returns an HTML document with a server-rendered `AgentShell`.
 - Unknown routes return the router `404` response.
 
 The HTML includes:
 
 - `http://localhost:3002/main.css` by default
 - `http://localhost:3002/index.js` by default
-- the demo avatar at `http://localhost:3001/avatar.svg`
+- the local agent shell mounted by the UI bundle
 
 The UI origin is read through `getUi()` from `@p/env`.
 

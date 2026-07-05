@@ -51,7 +51,7 @@ describe('workspaces/api/index.tsx', () => {
     expect(apiMock).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the demo page for the root route', async () => {
+  it('renders the local agent page for the root route', async () => {
     const handler = await loadHandler();
     const response = await handler(getEvent('/'));
 
@@ -67,12 +67,12 @@ describe('workspaces/api/index.tsx', () => {
       multiValueHeaders: undefined,
       statusCode: 200,
     });
-    expect(response.body).toContain('<title>Demo</title>');
+    expect(response.body).toContain('<title>Local Agent Starter</title>');
     expect(response.body).toContain('href="http://localhost:3002/main.css"');
     expect(response.body).toContain('<div id="root" rendered>');
-    expect(response.body).toContain('Developer');
-    expect(response.body).toContain('Senior IT Professional');
-    expect(response.body).toContain('http://localhost:3001/avatar.svg');
+    expect(response.body).toContain('Local Agent Starter');
+    expect(response.body).toContain('Application Trace');
+    expect(response.body).toContain('Retrieved Chunks');
     expect(response.body).toContain('src="http://localhost:3002/index.js"');
   });
 
