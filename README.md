@@ -14,24 +14,50 @@ yarn install
 
 The project uses Yarn workspaces and Node `>=24.0.0`.
 
-## Start
+## Development
 
 Start the API, static asset server, and UI dev server together:
 
 ```bash
-yarn start
+yarn dev
 ```
 
 Start individual workspaces:
 
 ```bash
-yarn start:api
-yarn start:static
-yarn start:ui
+yarn dev:api
+yarn dev:static
+yarn dev:ui
 ```
 
-`yarn start:static` uses the `vs` CLI from `@vyriy/static` to serve project
+`yarn dev:static` uses the `vs` CLI from `@vyriy/static` to serve project
 static files from `workspaces/static/public`.
+
+## Docker
+
+Start local Docker services in the background:
+
+```bash
+yarn start
+```
+
+Stop local Docker services:
+
+```bash
+yarn stop
+```
+
+`yarn start` runs `docker compose up -d`. `yarn stop` runs
+`docker compose down`.
+
+The compose file starts:
+
+- Postgres with pgvector on `localhost:${PG_PORT}`.
+- pgAdmin on `http://localhost:${PGADMIN_PORT}`.
+
+Docker init scripts live in `docker/postgres`. Runtime database files live in
+`docker/data`, which is ignored by git. Postgres init scripts run only when the
+database directory is empty.
 
 ## Local URLs
 

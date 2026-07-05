@@ -22,4 +22,8 @@ cdk.context.json
 .codex
 .agents
 
+.env
+
+docker/data/
+
 !/**/.gitkeep
