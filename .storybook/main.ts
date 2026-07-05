@@ -9,5 +9,6 @@ export default {
     path('packages/**/*.stories.@(js|jsx|mjs|ts|tsx)'),
     path('workspaces/**/*.mdx'),
     path('workspaces/**/*.stories.@(js|jsx|mjs|ts|tsx)'),
+    path('docs/*.mdx'),
   ],
 };

@@ -6291,6 +6291,9 @@ __metadata:
 "@w/api@workspace:workspaces/api":
   version: 0.0.0-use.local
   resolution: "@w/api@workspace:workspaces/api"
+  dependencies:
+    react: "npm:^19.2.7"
+    react-dom: "npm:^19.2.7"
   languageName: unknown
   linkType: soft
 
