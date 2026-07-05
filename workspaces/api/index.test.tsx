@@ -73,7 +73,7 @@ describe('workspaces/api/index.tsx', () => {
     expect(response.body).toContain('Local Agent Starter');
     expect(response.body).toContain('Application Trace');
     expect(response.body).toContain('Retrieved Chunks');
-    expect(response.body).toContain('src="http://localhost:3002/index.js"');
+    expect(response.body).toMatch(/src\s*=\s*"http:\/\/localhost:3002\/index\.js"/);
   });
 
   it('returns not found for unknown routes', async () => {

@@ -4001,6 +4001,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@p/api@workspace:packages/api":
+  version: 0.0.0-use.local
+  resolution: "@p/api@workspace:packages/api"
+  languageName: unknown
+  linkType: soft
+
 "@p/components@workspace:packages/components":
   version: 0.0.0-use.local
   resolution: "@p/components@workspace:packages/components"
