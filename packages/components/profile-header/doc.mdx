@@ -1,0 +1,13 @@
+import { Meta, Markdown, Canvas } from '@storybook/addon-docs/blocks';
+import ReadMe from './README.md?raw';
+
+import * as ProfileHeaderStories from './profile-header.stories';
+
+<Meta of={ProfileHeaderStories} />
+
+<Markdown>{ReadMe}</Markdown>
+
+## Examples
+
+<Canvas of={ProfileHeaderStories.Default} />
+<Canvas of={ProfileHeaderStories.WithAvatar} />

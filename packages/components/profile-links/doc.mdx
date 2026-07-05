@@ -1,0 +1,13 @@
+import { Meta, Markdown, Canvas } from '@storybook/addon-docs/blocks';
+import ReadMe from './README.md?raw';
+
+import * as ProfileLinksStories from './profile-links.stories';
+
+<Meta of={ProfileLinksStories} />
+
+<Markdown>{ReadMe}</Markdown>
+
+## Examples
+
+<Canvas of={ProfileLinksStories.Default} />
+<Canvas of={ProfileLinksStories.Buttons} />

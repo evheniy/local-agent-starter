@@ -1,0 +1,36 @@
+.profile-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.profile-header__content {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+}
+
+.profile-header__name {
+  margin: 0;
+  color: var(--profile-card-color, #111827);
+  font-size: 1.2rem;
+  font-weight: 750;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.profile-header__title {
+  margin: 0;
+  color: var(--profile-card-color, #111827);
+  font-size: 0.925rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.profile-header__description {
+  margin: 0.25rem 0 0;
+  color: var(--profile-card-muted-color, #6b7280);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}

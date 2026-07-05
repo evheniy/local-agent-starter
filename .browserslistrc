@@ -1,0 +1,11 @@
+[development]
+extends @vyriy/browserslist-config
+
+[ssr]
+extends @vyriy/browserslist-config
+
+[production]
+extends @vyriy/browserslist-config
+
+[modern]
+extends @vyriy/browserslist-config

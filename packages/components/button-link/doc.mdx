@@ -1,0 +1,14 @@
+import { Meta, Markdown, Canvas } from '@storybook/addon-docs/blocks';
+import ReadMe from './README.md?raw';
+
+import * as ButtonLinkStories from './button-link.stories';
+
+<Meta of={ButtonLinkStories} />
+
+<Markdown>{ReadMe}</Markdown>
+
+## Examples
+
+<Canvas of={ButtonLinkStories.Default} />
+<Canvas of={ButtonLinkStories.Secondary} />
+<Canvas of={ButtonLinkStories.Ghost} />

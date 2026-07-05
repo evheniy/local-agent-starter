@@ -1,0 +1,9 @@
+.profile-card {
+  max-width: 28rem;
+  color: var(--profile-card-color, #111827);
+}
+
+.profile-card__content {
+  display: grid;
+  gap: 1rem;
+}
