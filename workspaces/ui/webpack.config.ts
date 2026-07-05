@@ -6,14 +6,14 @@ import { path } from '@vyriy/path';
 export default csr(
   '@w/ui',
   {
-    path: path('dist', 'cdn'),
+    path: path('dist', 'api', 'static'),
     filename: 'index.js',
   },
   (config) => ({
     ...config,
     plugins: [
       ...(config.plugins ?? []),
-      new EnvironmentPlugin(['API', 'CDN', 'UI']),
+      new EnvironmentPlugin(['API', 'UI']),
       html({
         htmlAttributes: 'lang="en"',
         title: '<title>Demo</title>',

@@ -24,6 +24,6 @@ cdk.context.json
 
 .env
 
-docker/data/
+docker/docs/
 
 !/**/.gitkeep

@@ -22,7 +22,7 @@ The UI origin is read through `getUi()` from `@p/env`.
 From the repository root:
 
 ```bash
-yarn start:api
+yarn dev:api
 ```
 
 The script sources `workspaces/env.sh` and starts `workspaces/api/index.tsx` with `tsx watch`.
@@ -36,7 +36,7 @@ Default local values:
 Run the static and UI workspaces alongside the API when loading the full page:
 
 ```bash
-yarn start
+yarn dev
 ```
 
 ## Build
@@ -46,6 +46,23 @@ yarn build:api
 ```
 
 The build emits the server bundle to `dist/api/index.js` and copies the workspace `package.json` into `dist/api`.
+
+## Docker
+
+The API Dockerfile is runtime-only. Build the API first:
+
+```bash
+yarn build:api
+```
+
+Then build the image from the generated API output:
+
+```bash
+docker build -f workspaces/api/Dockerfile dist/api
+```
+
+The Dockerfile expects `index.js` and `package.json` to already exist in the
+build context. It exposes port `3000`, which matches the default `PORT` value.
 
 ## Validation
 

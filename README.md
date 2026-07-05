@@ -47,17 +47,20 @@ Stop local Docker services:
 yarn stop
 ```
 
-`yarn start` runs `docker compose up -d`. `yarn stop` runs
+`yarn start` runs `docker compose up -d --build`. `yarn stop` runs
 `docker compose down`.
 
 The compose file starts:
 
 - Postgres with pgvector on `localhost:${PG_PORT}`.
-- pgAdmin on `http://localhost:${PGADMIN_PORT}`.
+- pgAdmin on `http://localhost:${PGADMIN_PORT}` with a preconfigured
+  `Local RAG Postgres` server.
 
-Docker init scripts live in `docker/postgres`. Runtime database files live in
-`docker/data`, which is ignored by git. Postgres init scripts run only when the
-database directory is empty.
+Docker init scripts live in `docker/postgres`. pgAdmin server definitions live
+in `docker/pgadmin`. Postgres data is stored in the `postgres-data` Docker
+named volume mounted at `/var/lib/postgresql`, so it persists across
+`docker compose down` without writing database files into the repository.
+Postgres init scripts run only when the named volume is empty.
 
 ## Local URLs
 

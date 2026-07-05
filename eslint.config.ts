@@ -1,3 +1,8 @@
 import config from '@vyriy/eslint-config';
 
-export default config;
+export default [
+  {
+    ignores: ['docker/**'],
+  },
+  ...config,
+];

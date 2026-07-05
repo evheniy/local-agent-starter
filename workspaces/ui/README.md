@@ -17,7 +17,7 @@ import '@p/components/styles.scss';
 From the repository root:
 
 ```bash
-yarn start:ui
+yarn dev:ui
 ```
 
 The script sources `workspaces/env.sh` and starts webpack dev server for `workspaces/ui/index.tsx`.

@@ -1,5 +1,9 @@
 {
   "name": "@w/api",
   "type": "module",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  }
 }

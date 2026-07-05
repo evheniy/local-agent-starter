@@ -4,7 +4,10 @@ import { path } from '@vyriy/path';
 export default {
   ...config,
   stories: [
-    path('**/*.mdx'),
-    path('**/*.stories.@(js|jsx|mjs|ts|tsx)'),
+    path('.storybook/doc.mdx'),
+    path('packages/**/*.mdx'),
+    path('packages/**/*.stories.@(js|jsx|mjs|ts|tsx)'),
+    path('workspaces/**/*.mdx'),
+    path('workspaces/**/*.stories.@(js|jsx|mjs|ts|tsx)'),
   ],
 };

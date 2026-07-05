@@ -14,11 +14,7 @@ export default ssr(
     externals: [external({ allowlist: [/^@p/, /^@w/, /^@vyriy/] })],
     plugins: [
       ...(config.plugins ?? []),
-      new EnvironmentPlugin([
-        'API',
-        'CDN',
-        'UI',
-      ]),
+      new EnvironmentPlugin(['API', 'UI']),
     ],
   }),
 );
