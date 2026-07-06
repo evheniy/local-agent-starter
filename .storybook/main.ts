@@ -5,10 +5,10 @@ export default {
   ...config,
   stories: [
     path('.storybook/doc.mdx'),
-    path('packages/**/*.mdx'),
-    path('packages/**/*.stories.@(js|jsx|mjs|ts|tsx)'),
+    path('docs/*.mdx'),
     path('workspaces/**/*.mdx'),
     path('workspaces/**/*.stories.@(js|jsx|mjs|ts|tsx)'),
-    path('docs/*.mdx'),
+    path('packages/**/*.mdx'),
+    path('packages/**/*.stories.@(js|jsx|mjs|ts|tsx)'),
   ],
 };

@@ -5,9 +5,11 @@ export type FileUploadStatus = 'idle' | 'uploading' | 'success' | 'error';
 
 /** Props for the FileUploadPanel component. */
 export type FileUploadPanelProps = {
+  file?: File;
   status?: FileUploadStatus;
   error?: string;
-  onUpload?: (file: File) => void | Promise<void>;
+  onFileChange?: (file: File | undefined) => void;
+  onUpload?: () => void | Promise<void>;
 } & ComponentProps<'section'>;
 
 /** FileUploadPanel component type. */

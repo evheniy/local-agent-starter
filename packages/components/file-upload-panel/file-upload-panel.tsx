@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { cn } from '@vyriy/cn';
 
 import type { FileUploadPanelType } from './types.js';
@@ -19,9 +18,15 @@ const formatFileSize = (size: number) => {
 };
 
 /** Renders a local file picker ready for future ingest API wiring. */
-export const FileUploadPanel: FileUploadPanelType = ({ status = 'idle', error, onUpload, className, ...props }) => {
-  const [file, setFile] = useState<File>();
-
+export const FileUploadPanel: FileUploadPanelType = ({
+  file,
+  status = 'idle',
+  error,
+  onFileChange,
+  onUpload,
+  className,
+  ...props
+}) => {
   return (
     <section className={cn('file-upload-panel', className)} {...props}>
       <div className="file-upload-panel__field">
@@ -32,7 +37,7 @@ export const FileUploadPanel: FileUploadPanelType = ({ status = 'idle', error, o
           id="agent-file"
           className="file-upload-panel__input"
           type="file"
-          onChange={(event) => setFile(event.target.files?.[0])}
+          onChange={(event) => onFileChange?.(event.target.files?.[0])}
         />
       </div>
       {file ? (
@@ -59,7 +64,7 @@ export const FileUploadPanel: FileUploadPanelType = ({ status = 'idle', error, o
         disabled={!file || status === 'uploading'}
         onClick={() => {
           if (file) {
-            void onUpload?.(file);
+            void onUpload?.();
           }
         }}
       >

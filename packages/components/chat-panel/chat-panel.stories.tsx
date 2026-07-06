@@ -7,7 +7,7 @@ const meta = {
   component: ChatPanel,
   parameters: { docs: { page: null } },
   args: {
-    defaultQuestion: 'What has been indexed?',
+    question: 'What has been indexed?',
     answer: 'This placeholder answer is ready to be replaced by streamed API output.',
   },
 } satisfies Meta<typeof ChatPanel>;
@@ -20,7 +20,7 @@ export const Default: Story = {};
 
 export const Empty: Story = {
   args: {
-    defaultQuestion: '',
+    question: '',
     answer: undefined,
   },
 };

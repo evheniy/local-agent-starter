@@ -1,3 +1,24 @@
 import '@p/components/styles.scss';
 
-export { default } from '@vyriy/storybook-config/preview';
+import type { Preview } from '@storybook/react-webpack5';
+
+import preview from '@vyriy/storybook-config/preview';
+
+export default {
+  ...preview,
+  parameters: {
+    ...preview.parameters,
+    options: {
+      storySort: {
+        method: 'alphabetical',
+        order: [
+          'Fullstack',
+          'Docs',
+          'Workspaces',
+          'Packages',
+          'Components',
+        ],
+      },
+    },
+  },
+} satisfies Preview;

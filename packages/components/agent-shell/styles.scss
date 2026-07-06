@@ -1,5 +1,7 @@
 .agent-shell {
   display: grid;
+  grid-template-rows: auto auto;
+  align-content: start;
   gap: 1.5rem;
   min-height: 100vh;
   box-sizing: border-box;

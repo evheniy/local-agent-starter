@@ -27,12 +27,16 @@
     "fix:eslint": "eslint . --fix",
     "fix:stylelint": "stylelint '**/*.{css,scss}' --fix",
     "dev:api": "sh workspaces/api/bin/start.sh",
+    "dev:chat": "sh workspaces/chat/bin/start.sh",
+    "dev:mcp": "sh workspaces/mcp/bin/start.sh",
     "dev:ui": "sh workspaces/ui/bin/start.sh",
     "lint:ts": "tsc",
     "lint:prettier": "prettier . --check",
     "lint:eslint": "eslint .",
     "lint:stylelint": "stylelint '**/*.{css,scss}'",
     "build:api": "sh workspaces/api/bin/build.sh",
+    "build:chat": "sh workspaces/chat/bin/build.sh",
+    "build:mcp": "sh workspaces/mcp/bin/build.sh",
     "build:ui": "sh workspaces/ui/bin/build.sh",
     "build:storybook": "cross-env STORYBOOK_DISABLE_TELEMETRY=1 storybook build --quiet --disable-telemetry",
     "test:jest": "jest",
@@ -78,5 +82,8 @@
     "typescript": "^6.0.3",
     "webpack": "^5.108.4",
     "webpack-cli": "^7.2.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
   }
 }

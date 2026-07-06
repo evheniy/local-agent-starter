@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { cn } from '@vyriy/cn';
 
@@ -6,26 +5,24 @@ import type { ChatPanelType } from './types.js';
 
 /** Renders a presentational question input and answer area for chat. */
 export const ChatPanel: ChatPanelType = ({
-  defaultQuestion = '',
+  question,
   answer,
+  canSubmit = Boolean(question.trim()),
   isLoading = false,
   error,
+  onQuestionChange,
   onSubmit,
   className,
   ...props
 }) => {
-  const [question, setQuestion] = useState(defaultQuestion);
-
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const trimmedQuestion = question.trim();
-
-    if (!trimmedQuestion || isLoading) {
+    if (!canSubmit || isLoading) {
       return;
     }
 
-    void onSubmit?.(trimmedQuestion);
+    void onSubmit?.();
   };
 
   return (
@@ -40,7 +37,7 @@ export const ChatPanel: ChatPanelType = ({
           value={question}
           placeholder="Ask about your indexed files..."
           rows={5}
-          onChange={(event) => setQuestion(event.target.value)}
+          onChange={(event) => onQuestionChange?.(event.target.value)}
         />
         <button className="chat-panel__submit" type="submit" disabled={!question.trim() || isLoading}>
           {isLoading ? 'Streaming answer...' : 'Ask'}

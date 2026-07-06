@@ -2,6 +2,12 @@ import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
 import { FileUploadPanel } from './file-upload-panel.js';
 
+const sampleFile = {
+  name: 'notes.md',
+  size: 17,
+  type: 'text/markdown',
+} as File;
+
 const meta = {
   title: 'Components/FileUploadPanel',
   component: FileUploadPanel,
@@ -14,6 +20,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const Selected: Story = { args: { file: sampleFile } };
 
 export const Uploading: Story = { args: { status: 'uploading' } };
 

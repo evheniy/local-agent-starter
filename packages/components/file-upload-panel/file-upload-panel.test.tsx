@@ -7,8 +7,7 @@ describe('FileUploadPanel', () => {
   it('shows selected file info', () => {
     const file = new File(['hello'], 'notes.md', { type: 'text/markdown' });
 
-    render(<FileUploadPanel />);
-    fireEvent.change(screen.getByLabelText('File'), { target: { files: [file] } });
+    render(<FileUploadPanel file={file} />);
 
     expect(screen.getByText('notes.md')).toBeDefined();
     expect(screen.getByText('5 B')).toBeDefined();
@@ -17,33 +16,31 @@ describe('FileUploadPanel', () => {
 
   it('calls onUpload with the selected file', () => {
     const file = new File(['hello'], 'notes.md', { type: 'text/markdown' });
-    const onUpload = jest.fn<(file: File) => void>();
+    const onUpload = jest.fn<() => void>();
 
-    render(<FileUploadPanel onUpload={onUpload} />);
-    fireEvent.change(screen.getByLabelText('File'), { target: { files: [file] } });
+    render(<FileUploadPanel file={file} onUpload={onUpload} />);
     fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
 
-    expect(onUpload).toHaveBeenCalledWith(file);
+    expect(onUpload).toHaveBeenCalledTimes(1);
   });
 
   it('renders large files and unknown file types', () => {
     const file = new File(['a'.repeat(2048)], 'notes.bin');
 
-    render(<FileUploadPanel />);
-    fireEvent.change(screen.getByLabelText('File'), { target: { files: [file] } });
+    render(<FileUploadPanel file={file} />);
 
     expect(screen.getByText('2.0 KB')).toBeDefined();
     expect(screen.getByText('Unknown type')).toBeDefined();
   });
 
-  it('allows selecting a file without an upload handler', () => {
+  it('calls onFileChange when a file is selected', () => {
     const file = new File(['hello'], 'notes.md', { type: 'text/markdown' });
+    const onFileChange = jest.fn<(file: File | undefined) => void>();
 
-    render(<FileUploadPanel />);
+    render(<FileUploadPanel onFileChange={onFileChange} />);
     fireEvent.change(screen.getByLabelText('File'), { target: { files: [file] } });
-    fireEvent.click(screen.getByRole('button', { name: 'Upload' }));
 
-    expect(screen.getByText('notes.md')).toBeDefined();
+    expect(onFileChange).toHaveBeenCalledWith(file);
   });
 
   it('renders upload status and error', () => {

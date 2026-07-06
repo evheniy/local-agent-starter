@@ -31,14 +31,15 @@ The script sources `workspaces/env.sh` and starts webpack dev server for `worksp
 
 Default local values:
 
-- `UI_PORT=3002`
-- `UI=http://localhost:3002`
-- `CDN=http://localhost:3001`
+- `UI_PORT=3001`
+- `UI=http://localhost:3001`
+- `API=http://localhost:3000`
 
-Run the full local application when the API, CDN assets, and UI bundle should all be available:
+Run the full local application when the API and UI bundle should both be
+available:
 
 ```bash
-yarn start
+yarn dev
 ```
 
 ## Build
@@ -47,7 +48,8 @@ yarn start
 yarn build:ui
 ```
 
-The build emits the browser bundle and generated HTML into `dist/cdn`.
+The build emits the browser bundle and generated HTML into `dist/api/static` so
+the API Docker image can serve SSR HTML and static assets together.
 
 ## Validation
 

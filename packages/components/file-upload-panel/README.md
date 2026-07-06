@@ -7,19 +7,21 @@
 ```tsx
 import { FileUploadPanel } from './file-upload-panel.js';
 
-export const Example = () => <FileUploadPanel onUpload={(file) => console.log(file.name)} />;
+export const Example = () => <FileUploadPanel onUpload={() => console.log('upload')} />;
 ```
 
 ## Props
 
 ```ts
 export type FileUploadPanelProps = {
+  file?: File;
   status?: FileUploadStatus;
   error?: string;
-  onUpload?: (file: File) => void | Promise<void>;
+  onFileChange?: (file: File | undefined) => void;
+  onUpload?: () => void | Promise<void>;
 } & ComponentProps<'section'>;
 ```
 
 ## Notes
 
-The component keeps the selected file locally and does not perform API calls.
+The component is controlled by props and does not perform API calls.

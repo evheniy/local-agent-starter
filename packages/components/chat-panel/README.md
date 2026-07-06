@@ -8,22 +8,26 @@ showing an answer placeholder.
 ```tsx
 import { ChatPanel } from './chat-panel.js';
 
-export const Example = () => <ChatPanel onSubmit={(question) => console.log(question)} />;
+export const Example = () => (
+  <ChatPanel question="What has been indexed?" onQuestionChange={console.log} onSubmit={() => console.log('submit')} />
+);
 ```
 
 ## Props
 
 ```ts
 export type ChatPanelProps = {
-  defaultQuestion?: string;
+  question: string;
   answer?: string;
+  canSubmit?: boolean;
   isLoading?: boolean;
   error?: string;
-  onSubmit?: (question: string) => void | Promise<void>;
+  onQuestionChange?: (question: string) => void;
+  onSubmit?: () => void | Promise<void>;
 } & Omit<ComponentProps<'section'>, 'onSubmit'>;
 ```
 
 ## Notes
 
-- API calls are intentionally not implemented here.
+- API calls and state are intentionally not implemented here.
 - The answer area is ready for future streamed output.

@@ -2,11 +2,13 @@ import type { ComponentProps, FC } from 'react';
 
 /** Props for the ChatPanel component. */
 export type ChatPanelProps = {
-  defaultQuestion?: string;
+  question: string;
   answer?: string;
+  canSubmit?: boolean;
   isLoading?: boolean;
   error?: string;
-  onSubmit?: (question: string) => void | Promise<void>;
+  onQuestionChange?: (question: string) => void;
+  onSubmit?: () => void | Promise<void>;
 } & Omit<ComponentProps<'section'>, 'onSubmit'>;
 
 /** ChatPanel component type. */

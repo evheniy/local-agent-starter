@@ -10,6 +10,8 @@ services:
       PORT: 3000
       LOG_LEVEL: info
       NODE_ENV: production
+      DOCS_DIR: /app/docs
+      UI: /static
     ports:
       - '${API_PORT}:3000'
     volumes:
@@ -17,6 +19,38 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - appnet
+
+  chat:
+    image: local-agent-chat
+    build:
+      context: ./dist/chat
+      dockerfile: ../../workspaces/chat/Dockerfile
+    container_name: chat
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      LOG_LEVEL: info
+      NODE_ENV: production
+    ports:
+      - '${CHAT_PORT}:3000'
+    networks:
+      - appnet
+
+  mcp:
+    image: local-agent-mcp
+    build:
+      context: ./dist/mcp
+      dockerfile: ../../workspaces/mcp/Dockerfile
+    container_name: mcp
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      LOG_LEVEL: info
+      NODE_ENV: production
+    ports:
+      - '${MCP_PORT}:3000'
     networks:
       - appnet
 
