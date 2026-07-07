@@ -28,7 +28,6 @@ export const html: Handler = () => ({
   ),
   headers: {
     'content-type': 'text/html; charset=utf-8',
-    'cache-control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
     'access-control-allow-origin': '*',
     'x-content-type-options': 'nosniff',
   },

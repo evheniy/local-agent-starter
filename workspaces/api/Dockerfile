@@ -5,6 +5,9 @@ WORKDIR /app
 ENV PORT=3000
 ENV LOG_LEVEL=info
 ENV NODE_ENV=production
+ENV DOCS_DIR=/app/docs
+ENV POSTGRES_HOST=postgres
+ENV POSTGRES_PORT=5432
 
 COPY --chown=node:node . .
 

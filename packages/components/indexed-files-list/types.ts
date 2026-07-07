@@ -20,3 +20,9 @@ export type IndexedFilesListProps = {
 
 /** IndexedFilesList component type. */
 export type IndexedFilesListType = FC<IndexedFilesListProps>;
+
+/** Formats an indexed file size for display. */
+export type IndexedFilesListFormatFileSizeType = (size?: number) => string;
+
+/** Display labels for every indexed file status. */
+export type IndexedFilesListStatusLabelsType = Record<IndexedFileStatus, string>;

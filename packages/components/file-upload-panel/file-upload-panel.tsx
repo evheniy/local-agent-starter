@@ -1,21 +1,8 @@
 import { cn } from '@vyriy/cn';
 
+import { formatFileSize } from './format-file-size.js';
+import { statusLabels } from './status-labels.js';
 import type { FileUploadPanelType } from './types.js';
-
-const statusLabels = {
-  idle: 'Select a file to upload.',
-  uploading: 'Uploading file...',
-  success: 'File uploaded successfully.',
-  error: 'Upload failed.',
-};
-
-const formatFileSize = (size: number) => {
-  if (size < 1024) {
-    return `${size} B`;
-  }
-
-  return `${(size / 1024).toFixed(1)} KB`;
-};
 
 /** Renders a local file picker ready for future ingest API wiring. */
 export const FileUploadPanel: FileUploadPanelType = ({

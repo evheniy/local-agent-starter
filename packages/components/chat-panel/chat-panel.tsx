@@ -1,6 +1,6 @@
-import type { FormEvent } from 'react';
 import { cn } from '@vyriy/cn';
 
+import { handleSubmit } from './handle-submit.js';
 import type { ChatPanelType } from './types.js';
 
 /** Renders a presentational question input and answer area for chat. */
@@ -15,19 +15,9 @@ export const ChatPanel: ChatPanelType = ({
   className,
   ...props
 }) => {
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!canSubmit || isLoading) {
-      return;
-    }
-
-    void onSubmit?.();
-  };
-
   return (
     <section className={cn('chat-panel', className)} {...props}>
-      <form className="chat-panel__form" onSubmit={handleSubmit}>
+      <form className="chat-panel__form" onSubmit={handleSubmit(onSubmit, { canSubmit, isLoading })}>
         <label className="chat-panel__label" htmlFor="agent-question">
           Question
         </label>

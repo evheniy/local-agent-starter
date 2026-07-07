@@ -4,10 +4,12 @@ Server-rendered workspace for the local agent starter application.
 
 ## Behavior
 
-The API starts an `@vyriy/server` handler and serves the root route:
+The API starts an `@vyriy/server` handler and serves:
 
 - `GET /` returns an HTML document with a server-rendered `AgentShell`.
-- `POST /upload?filename=name.ext` writes a raw uploaded file into `DOCS_DIR`.
+- `GET /files` returns persisted uploaded file metadata from Postgres.
+- `POST /upload?filename=name.ext` writes a raw uploaded file into `DOCS_DIR`
+  and persists metadata in `rag_files`.
 - `GET /static/*` serves the built UI assets when they are present in the API
   build output.
 - Unknown routes return the router `404` response.
@@ -21,7 +23,8 @@ The HTML includes:
 
 The UI origin is read through `getUi()` from `@p/env`.
 Upload storage is controlled by `DOCS_DIR`; it defaults to `docker/docs`
-locally and `/app/docs` in Docker Compose.
+locally and `/app/docs` in Docker Compose. Uploaded file metadata is stored in
+the `rag_files` Postgres table.
 
 ## Local Development
 

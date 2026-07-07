@@ -1,13 +1,44 @@
-import { mkdtemp, rm } from 'node:fs/promises';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
-
 import { describe, expect, it, jest } from '@jest/globals';
 import type { APIGatewayProxyEvent } from '@vyriy/router';
 
 const apiMock = jest.fn((handler) => ({ handler }));
+const filesMock = jest.fn(() =>
+  Promise.resolve({
+    body: JSON.stringify({
+      files: [],
+    }),
+    statusCode: 200,
+  }),
+);
+const htmlMock = jest.fn(() =>
+  Promise.resolve({
+    body: [
+      '<title>Local Agent Starter</title>',
+      'href="http://localhost:3002/main.css"',
+      '<div id="root" rendered>',
+      'Local Agent Starter',
+      'Application Trace',
+      'Retrieved Chunks',
+      'src="http://localhost:3002/index.js"',
+    ].join(''),
+    headers: {
+      'access-control-allow-origin': '*',
+      'content-type': 'text/html; charset=utf-8',
+      'x-content-type-options': 'nosniff',
+    },
+    statusCode: 200,
+  }),
+);
 const serverMock = jest.fn();
 const staticMock = jest.fn();
+const uploadMock = jest.fn(() =>
+  Promise.resolve({
+    body: JSON.stringify({
+      filename: 'AGENTS.md',
+    }),
+    statusCode: 201,
+  }),
+);
 type RouterApi = {
   get: (...args: unknown[]) => RouterApi;
   post: (...args: unknown[]) => RouterApi;
@@ -50,6 +81,12 @@ jest.mock('@vyriy/server', () => ({
 
 jest.mock('@p/env', () => ({
   getUi: () => 'http://localhost:3002',
+}));
+
+jest.mock('@p/api', () => ({
+  files: filesMock,
+  html: htmlMock,
+  upload: uploadMock,
 }));
 
 describe('workspaces/api/index.tsx', () => {
@@ -121,7 +158,6 @@ describe('workspaces/api/index.tsx', () => {
       body: expect.any(String),
       headers: {
         'access-control-allow-origin': '*',
-        'cache-control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
         'content-type': 'text/html; charset=utf-8',
         'x-content-type-options': 'nosniff',
       },
@@ -150,19 +186,24 @@ describe('workspaces/api/index.tsx', () => {
   });
 
   it('routes file uploads', async () => {
-    const docsDir = await mkdtemp(join(tmpdir(), 'local-agent-docs-'));
     const handler = await loadHandler();
 
-    try {
-      process.env.DOCS_DIR = docsDir;
+    await expect(handler(getUploadEvent())).resolves.toMatchObject({
+      body: expect.stringContaining('"filename":"AGENTS.md"'),
+      statusCode: 201,
+    });
+    expect(uploadMock).toHaveBeenCalledTimes(1);
+  });
 
-      await expect(handler(getUploadEvent())).resolves.toMatchObject({
-        body: expect.stringContaining('"filename":"AGENTS.md"'),
-        statusCode: 201,
-      });
-    } finally {
-      delete process.env.DOCS_DIR;
-      await rm(docsDir, { recursive: true, force: true });
-    }
+  it('routes file metadata reads', async () => {
+    const handler = await loadHandler();
+
+    await expect(handler(getEvent('/files'))).resolves.toEqual({
+      body: JSON.stringify({
+        files: [],
+      }),
+      statusCode: 200,
+    });
+    expect(filesMock).toHaveBeenCalledTimes(1);
   });
 });

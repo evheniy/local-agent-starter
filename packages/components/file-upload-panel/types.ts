@@ -14,3 +14,9 @@ export type FileUploadPanelProps = {
 
 /** FileUploadPanel component type. */
 export type FileUploadPanelType = FC<FileUploadPanelProps>;
+
+/** Formats a file size for display. */
+export type FileUploadPanelFormatFileSizeType = (size: number) => string;
+
+/** Display labels for every file upload status. */
+export type FileUploadPanelStatusLabelsType = Record<FileUploadStatus, string>;

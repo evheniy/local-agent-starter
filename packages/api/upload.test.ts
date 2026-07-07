@@ -5,9 +5,24 @@ import { tmpdir } from 'node:os';
 import { describe, expect, it, jest } from '@jest/globals';
 import type { HandlerParams } from '@vyriy/router';
 
-import { upload } from './upload.js';
+import { createUploadHandler } from './upload.js';
+
+import type { CreateUploadedFileType, GetUploadedFileByPathType, UploadedFile } from '@p/services/postgres';
 
 describe('upload handler', () => {
+  const createUploadedFile = jest.fn<CreateUploadedFileType>(({ name, path, size, type }): Promise<UploadedFile> => {
+    return Promise.resolve({
+      id: `file-${name}`,
+      name,
+      path,
+      size,
+      type,
+      status: 'uploaded',
+    });
+  });
+  const getUploadedFileByPath = jest.fn<GetUploadedFileByPathType>(() => Promise.resolve(undefined));
+  const upload = createUploadHandler({ createUploadedFile, getUploadedFileByPath });
+
   const createParams = (docsDir: string, body = 'hello docs'): HandlerParams => {
     process.env.DOCS_DIR = docsDir;
 
@@ -42,20 +57,29 @@ describe('upload handler', () => {
     try {
       const response = await upload(createParams(docsDir));
 
-      expect(response).toEqual({
+      expect(response).toMatchObject({
         statusCode: 201,
-        headers: {
-          'access-control-allow-origin': '*',
-          'content-type': 'application/json; charset=utf-8',
-          'x-content-type-options': 'nosniff',
-        },
-        body: JSON.stringify({
-          ok: true,
-          filename: 'AGENTS.md',
-          path: 'docs/AGENTS.md',
-          bytes: 10,
-        }),
       });
+      expect(JSON.parse(response.body)).toEqual({
+        ok: true,
+        filename: 'AGENTS.md',
+        path: 'docs/AGENTS.md',
+        bytes: 10,
+        file: {
+          id: 'file-AGENTS.md',
+          name: 'AGENTS.md',
+          path: 'docs/AGENTS.md',
+          size: 10,
+          status: 'uploaded',
+        },
+      });
+      expect(createUploadedFile).toHaveBeenCalledWith({
+        name: 'AGENTS.md',
+        path: 'docs/AGENTS.md',
+        size: 10,
+        type: undefined,
+      });
+      expect(getUploadedFileByPath).toHaveBeenCalledWith('docs/AGENTS.md');
       await expect(readFile(join(docsDir, 'AGENTS.md'), 'utf8')).resolves.toBe('hello docs');
     } finally {
       delete process.env.DOCS_DIR;
@@ -77,6 +101,44 @@ describe('upload handler', () => {
       delete process.env.DOCS_DIR;
       await rm(docsDir, { recursive: true, force: true });
     }
+  });
+
+  it('rejects duplicate uploads before writing file content', async () => {
+    const existingFile: UploadedFile = {
+      id: 'file-AGENTS.md',
+      name: 'AGENTS.md',
+      path: 'docs/AGENTS.md',
+      size: 10,
+      status: 'uploaded',
+    };
+    const duplicateLookup = jest.fn<GetUploadedFileByPathType>(() => Promise.resolve(existingFile));
+    const saveUploadedFile = jest.fn(() => Promise.reject(new Error('Storage should not be called.')));
+    const duplicateUpload = createUploadHandler({
+      createUploadedFile,
+      getUploadedFileByPath: duplicateLookup,
+      saveUploadedFile,
+    });
+
+    await expect(
+      duplicateUpload({
+        body: 'hello docs',
+        event: {
+          isBase64Encoded: false,
+        },
+        headers: {},
+        query: {
+          filename: '../AGENTS.md',
+        },
+      } as unknown as HandlerParams),
+    ).resolves.toEqual({
+      statusCode: 409,
+      body: JSON.stringify({
+        message: 'File already exists.',
+        file: existingFile,
+      }),
+    });
+    expect(duplicateLookup).toHaveBeenCalledWith('docs/AGENTS.md');
+    expect(saveUploadedFile).not.toHaveBeenCalled();
   });
 
   it('uses upload metadata from headers and supports base64 bodies', async () => {
@@ -117,28 +179,86 @@ describe('upload handler', () => {
   it('falls back to the default docs directory and generated file name', async () => {
     jest.spyOn(Date, 'now').mockReturnValue(123);
     delete process.env.DOCS_DIR;
+    const filePath = join(process.cwd(), 'docker', 'docs', 'upload-123.txt');
 
-    const response = await upload({
-      body: 'generated docs',
-      event: {
-        isBase64Encoded: false,
-      },
-      headers: {},
-      query: {},
-    } as unknown as HandlerParams);
+    try {
+      const response = await upload({
+        body: 'generated docs',
+        event: {
+          isBase64Encoded: false,
+        },
+        headers: {},
+        query: {},
+      } as unknown as HandlerParams);
 
-    expect(response).toMatchObject({
-      statusCode: 201,
-      body: JSON.stringify({
+      expect(response).toMatchObject({
+        statusCode: 201,
+      });
+      expect(JSON.parse(response.body)).toEqual({
         ok: true,
         filename: 'upload-123.txt',
         path: 'docs/upload-123.txt',
         bytes: 14,
-      }),
-    });
-    await expect(readFile(join(process.cwd(), 'docker', 'docs', 'upload-123.txt'), 'utf8')).resolves.toBe(
-      'generated docs',
-    );
+        file: {
+          id: 'file-upload-123.txt',
+          name: 'upload-123.txt',
+          path: 'docs/upload-123.txt',
+          size: 14,
+          status: 'uploaded',
+        },
+      });
+      await expect(readFile(filePath, 'utf8')).resolves.toBe('generated docs');
+    } finally {
+      await rm(filePath, { force: true });
+    }
+  });
+
+  it('uses the local docs directory when development inherits the Docker docs path', async () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    const filePath = join(process.cwd(), 'docker', 'docs', 'upload-321.txt');
+
+    jest.spyOn(Date, 'now').mockReturnValue(321);
+
+    try {
+      process.env.NODE_ENV = 'development';
+      process.env.DOCS_DIR = '/app/docs';
+
+      const response = await upload({
+        body: 'local docs',
+        event: {
+          isBase64Encoded: false,
+        },
+        headers: {},
+        query: {},
+      } as unknown as HandlerParams);
+
+      expect(response).toMatchObject({
+        statusCode: 201,
+      });
+      expect(JSON.parse(response.body)).toEqual({
+        ok: true,
+        filename: 'upload-321.txt',
+        path: 'docs/upload-321.txt',
+        bytes: 10,
+        file: {
+          id: 'file-upload-321.txt',
+          name: 'upload-321.txt',
+          path: 'docs/upload-321.txt',
+          size: 10,
+          status: 'uploaded',
+        },
+      });
+      await expect(readFile(filePath, 'utf8')).resolves.toBe('local docs');
+    } finally {
+      if (typeof previousNodeEnv === 'string') {
+        process.env.NODE_ENV = previousNodeEnv;
+      } else {
+        delete process.env.NODE_ENV;
+      }
+
+      delete process.env.DOCS_DIR;
+      await rm(filePath, { force: true });
+    }
   });
 
   it('handles missing headers while deriving upload metadata', async () => {
@@ -174,7 +294,8 @@ describe('upload handler', () => {
       process.env.DOCS_DIR = docsDir;
 
       await jest.isolateModulesAsync(async () => {
-        const { upload: isolatedUpload } = await import('./upload.js');
+        const { createUploadHandler: createIsolatedUploadHandler } = await import('./upload.js');
+        const isolatedUpload = createIsolatedUploadHandler({ createUploadedFile, getUploadedFileByPath });
 
         await isolatedUpload({
           body: 'fallback docs',

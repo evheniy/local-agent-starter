@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
-import type { AgentShellTab } from '@p/components/agent-shell';
+import type { UseAgentShellTabResult, UseAgentShellTabType } from './types.js';
 
-export const useAgentShellTab = (initialTab: AgentShellTab = 'chat') => {
-  const [tab, setTab] = useState<AgentShellTab>(initialTab);
+export const useAgentShellTab: UseAgentShellTabType = (initialTab = 'chat') => {
+  const [tab, setTab] = useState<UseAgentShellTabResult['tab']>(initialTab);
 
   return {
     tab,

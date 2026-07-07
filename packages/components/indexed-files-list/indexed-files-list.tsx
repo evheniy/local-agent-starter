@@ -1,25 +1,8 @@
 import { cn } from '@vyriy/cn';
 
+import { formatFileSize } from './format-file-size.js';
+import { statusLabels } from './status-labels.js';
 import type { IndexedFilesListType } from './types.js';
-
-const statusLabels = {
-  uploaded: 'Uploaded',
-  indexing: 'Indexing',
-  indexed: 'Indexed',
-  error: 'Error',
-};
-
-const formatFileSize = (size?: number) => {
-  if (typeof size !== 'number') {
-    return 'Unknown size';
-  }
-
-  if (size < 1024) {
-    return `${size} B`;
-  }
-
-  return `${(size / 1024).toFixed(1)} KB`;
-};
 
 /** Renders indexed or uploaded files for the local agent app. */
 export const IndexedFilesList: IndexedFilesListType = ({ files = [], className, ...props }) => {

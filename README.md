@@ -28,6 +28,7 @@ Start individual workspaces:
 yarn dev:api
 yarn dev:chat
 yarn dev:mcp
+yarn dev:postgres
 yarn dev:ui
 ```
 
@@ -37,9 +38,14 @@ Default local ports are defined in `workspaces/env.sh`:
 - UI dev assets: `http://localhost:3001`
 - Chat: `http://localhost:3002`
 - MCP: `http://localhost:3003`
+- Postgres with pgvector: `localhost:5432`
 
 Override `API_PORT`, `UI_PORT`, `CHAT_PORT`, `MCP_PORT`, `API`, `UI`, `CHAT`,
 or `MCP` before running a script when local services need different addresses.
+
+`yarn dev:postgres` runs `docker compose up postgres` in the foreground. When
+it is started by `yarn dev`, pressing Ctrl+C stops the workspace processes and
+the local Postgres container.
 
 ## Docker
 
@@ -79,7 +85,7 @@ definitions live in `docker/pgadmin`.
 
 ## Workspaces
 
-- `workspaces/api` serves `GET /`, `POST /upload`, and `/static/*`.
+- `workspaces/api` serves `GET /`, `GET /files`, `POST /upload`, and `/static/*`.
 - `workspaces/chat` serves streaming chat responses from `POST /chat`.
 - `workspaces/mcp` serves MCP Streamable HTTP from `POST /mcp`.
 - `workspaces/ui` builds and serves the browser entry point.
@@ -94,6 +100,8 @@ workspace code owns runtime startup, transport, bundling, and deployment shape.
 - `packages/components` contains shared dumb React components and styles.
 - `packages/env` contains required environment readers.
 - `packages/mcp` contains MCP server/tool registration logic.
+- `packages/services` contains infrastructure service clients and actions,
+  including Postgres access under `@p/services/postgres`.
 
 Components in `packages/components` should stay presentational and controlled by
 props. Workspace entry points and hooks own state, effects, and API wiring.
@@ -104,10 +112,12 @@ Demo data belongs in Storybook stories.
 The API workspace exposes:
 
 - `GET /` - server-rendered `AgentShell` HTML.
+- `GET /files` - persisted uploaded file metadata from Postgres.
 - `POST /upload?filename=name.ext` - raw file upload into `DOCS_DIR`.
 - `GET /static/*` - built UI assets in Docker and production builds.
 
 `DOCS_DIR` defaults to `docker/docs` locally and `/app/docs` in Docker.
+Uploaded file metadata is stored in the `rag_files` Postgres table.
 
 The chat workspace exposes:
 

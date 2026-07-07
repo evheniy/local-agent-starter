@@ -1,0 +1,8 @@
+{
+  "name": "@p/services",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "pg": "^8.22.0"
+  }
+}

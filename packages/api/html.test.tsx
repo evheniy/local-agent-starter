@@ -46,7 +46,6 @@ describe('html handler', () => {
     expect(response).toMatchObject({
       headers: {
         'access-control-allow-origin': '*',
-        'cache-control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
         'content-type': 'text/html; charset=utf-8',
         'x-content-type-options': 'nosniff',
       },

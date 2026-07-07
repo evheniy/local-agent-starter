@@ -19,3 +19,6 @@ export type TracePanelProps = {
 
 /** TracePanel component type. */
 export type TracePanelType = FC<TracePanelProps>;
+
+/** Display labels for every trace event status. */
+export type TracePanelStatusLabelsType = Record<TraceEventStatus, string>;

@@ -1,17 +1,23 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import { basename, join, resolve } from 'node:path';
-
 import type { Handler } from '@vyriy/router';
 
-const DEFAULT_DOCS_DIR = process.env.NODE_ENV === 'production' ? '/app/docs' : join(process.cwd(), 'docker', 'docs');
+import {
+  createUploadedFileTarget as createStoredUploadedFileTarget,
+  saveUploadedFile as saveStoredUploadedFile,
+} from '@p/services/fs';
+import {
+  createUploadedFile as createStoredUploadedFile,
+  getUploadedFileByPath as getStoredUploadedFileByPath,
+} from '@p/services/postgres';
 
-const JSON_HEADERS = {
-  'access-control-allow-origin': '*',
-  'content-type': 'application/json; charset=utf-8',
-  'x-content-type-options': 'nosniff',
+import type { CreateUploadedFileTargetType, SaveUploadedFileType } from '@p/services/fs';
+import type { CreateUploadedFileType, GetUploadedFileByPathType } from '@p/services/postgres';
+
+type CreateUploadHandlerOptions = {
+  createUploadedFile?: CreateUploadedFileType;
+  saveUploadedFile?: SaveUploadedFileType;
+  getUploadedFileByPath?: GetUploadedFileByPathType;
+  createUploadedFileTarget?: CreateUploadedFileTargetType;
 };
-
-const getDocsDir = () => process.env.DOCS_DIR ?? DEFAULT_DOCS_DIR;
 
 const getHeader = (headers: Record<string, string | undefined> | undefined, name: string) => {
   const normalizedName = name.toLowerCase();
@@ -25,19 +31,6 @@ const getContentDispositionFilename = (contentDisposition: string | undefined) =
   return match?.groups?.filename;
 };
 
-const sanitizeFilename = (filename: string | undefined) => {
-  const normalized = basename(filename?.trim() || `upload-${Date.now()}.txt`).replaceAll(/[^\w.-]+/gu, '-');
-
-  return normalized || `upload-${Date.now()}.txt`;
-};
-
-const resolveUploadPath = (filename: string) => {
-  const docsDir = resolve(getDocsDir());
-  const filePath = resolve(docsDir, filename);
-
-  return { docsDir, filePath };
-};
-
 const getUploadBody = (body: string | undefined, isBase64Encoded?: boolean) => {
   if (!body) {
     return undefined;
@@ -46,37 +39,60 @@ const getUploadBody = (body: string | undefined, isBase64Encoded?: boolean) => {
   return isBase64Encoded ? Buffer.from(body, 'base64') : Buffer.from(body);
 };
 
-export const upload: Handler = async ({ body, event, headers, query }) => {
-  const content = getUploadBody(body, event.isBase64Encoded);
+export const createUploadHandler = ({
+  createUploadedFile = createStoredUploadedFile(),
+  saveUploadedFile = saveStoredUploadedFile,
+  getUploadedFileByPath = getStoredUploadedFileByPath(),
+  createUploadedFileTarget = createStoredUploadedFileTarget,
+}: CreateUploadHandlerOptions = {}): Handler => {
+  return async ({ body, event, headers, query }) => {
+    const content = getUploadBody(body, event.isBase64Encoded);
 
-  if (!content?.byteLength) {
+    if (!content?.byteLength) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: 'Upload body is required.',
+        }),
+      };
+    }
+
+    const target = createUploadedFileTarget(
+      query?.filename ??
+        getHeader(headers, 'x-file-name') ??
+        getContentDispositionFilename(getHeader(headers, 'content-disposition')),
+    );
+    const existingFile = await getUploadedFileByPath(target.path);
+
+    if (existingFile) {
+      return {
+        statusCode: 409,
+        body: JSON.stringify({
+          message: 'File already exists.',
+          file: existingFile,
+        }),
+      };
+    }
+
+    const savedFile = await saveUploadedFile({ content, target });
+    const file = await createUploadedFile({
+      name: savedFile.filename,
+      path: savedFile.path,
+      size: savedFile.bytes,
+      type: getHeader(headers, 'content-type'),
+    });
+
     return {
-      statusCode: 400,
-      headers: JSON_HEADERS,
+      statusCode: 201,
       body: JSON.stringify({
-        message: 'Upload body is required.',
+        ok: true,
+        filename: savedFile.filename,
+        path: savedFile.path,
+        bytes: savedFile.bytes,
+        file,
       }),
     };
-  }
-
-  const filename = sanitizeFilename(
-    query?.filename ??
-      getHeader(headers, 'x-file-name') ??
-      getContentDispositionFilename(getHeader(headers, 'content-disposition')),
-  );
-  const { docsDir, filePath } = resolveUploadPath(filename);
-
-  await mkdir(docsDir, { recursive: true });
-  await writeFile(filePath, content);
-
-  return {
-    statusCode: 201,
-    headers: JSON_HEADERS,
-    body: JSON.stringify({
-      ok: true,
-      filename,
-      path: `docs/${filename}`,
-      bytes: content.byteLength,
-    }),
   };
 };
+
+export const upload = createUploadHandler();

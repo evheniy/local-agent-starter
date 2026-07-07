@@ -1,13 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { request } from '@vyriy/request';
 
-import type { FileUploadStatus } from '@p/components/file-upload-panel';
-import type { IndexedFile } from '@p/components/indexed-files-list';
+import type { UseFileUploadStateResult, UseFileUploadStateType } from './types.js';
 
-export const useFileUploadState = () => {
-  const [error, setError] = useState<string>();
-  const [file, setFile] = useState<File>();
-  const [files, setFiles] = useState<IndexedFile[]>([]);
-  const [status, setStatus] = useState<FileUploadStatus>('idle');
+export const useFileUploadState: UseFileUploadStateType = () => {
+  const [error, setError] = useState<UseFileUploadStateResult['error']>();
+  const [file, setFile] = useState<UseFileUploadStateResult['file']>();
+  const [files, setFiles] = useState<UseFileUploadStateResult['files']>([]);
+  const [status, setStatus] = useState<UseFileUploadStateResult['status']>('idle');
+
+  const syncFiles = async () => {
+    try {
+      const filesUrl = new URL('/files', process.env.API);
+      const response = await request<{ files: UseFileUploadStateResult['files'] }>(filesUrl.toString());
+
+      setFiles(response.files);
+    } catch (syncError) {
+      setError(syncError instanceof Error ? syncError.message : 'Could not load uploaded files.');
+    }
+  };
 
   const uploadFile = async () => {
     if (!file || status === 'uploading') {
@@ -17,8 +28,22 @@ export const useFileUploadState = () => {
     setError(undefined);
     setStatus('uploading');
 
+    const optimisticFile = {
+      id: `optimistic-${file.name}-${file.size}-${file.lastModified}`,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      status: 'uploaded' as const,
+    };
+
+    setFiles((items) => [optimisticFile, ...items]);
+
     try {
-      const response = await fetch(`/upload?filename=${encodeURIComponent(file.name)}`, {
+      const uploadUrl = new URL('/upload', process.env.API);
+
+      uploadUrl.searchParams.set('filename', file.name);
+
+      const response = await request<{ file: UseFileUploadStateResult['files'][number] }>(uploadUrl.toString(), {
         method: 'POST',
         headers: {
           'content-type': file.type || 'application/octet-stream',
@@ -26,26 +51,18 @@ export const useFileUploadState = () => {
         body: file,
       });
 
-      if (!response.ok) {
-        throw new Error(`Upload failed with status ${response.status}.`);
-      }
-
-      setFiles((items) => [
-        {
-          id: `${file.name}-${file.size}-${file.lastModified}`,
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          status: 'uploaded',
-        },
-        ...items,
-      ]);
+      setFiles((items) => items.map((item) => (item.id === optimisticFile.id ? response.file : item)));
       setStatus('success');
     } catch (uploadError) {
+      setFiles((items) => items.filter((item) => item.id !== optimisticFile.id));
       setError(uploadError instanceof Error ? uploadError.message : 'Upload failed.');
       setStatus('error');
     }
   };
+
+  useEffect(() => {
+    void Promise.resolve().then(syncFiles);
+  }, []);
 
   return {
     error,
@@ -53,6 +70,7 @@ export const useFileUploadState = () => {
     files,
     setFile,
     status,
+    syncFiles,
     uploadFile,
   };
 };

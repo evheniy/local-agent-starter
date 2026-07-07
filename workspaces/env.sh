@@ -4,6 +4,12 @@
 : "${UI_PORT:=3001}"
 : "${CHAT_PORT:=3002}"
 : "${MCP_PORT:=3003}"
+: "${PG_PORT:=5432}"
+: "${POSTGRES_HOST:=localhost}"
+: "${POSTGRES_PORT:=$PG_PORT}"
+: "${POSTGRES_DB:=rag}"
+: "${POSTGRES_USER:=rag}"
+: "${POSTGRES_PASSWORD:=rag}"
 : "${DOCS_DIR:=$PWD/docker/docs}"
 : "${API:=http://localhost:$API_PORT}"
 : "${UI:=http://localhost:$UI_PORT}"
@@ -14,6 +20,12 @@ export API_PORT
 export UI_PORT
 export CHAT_PORT
 export MCP_PORT
+export PG_PORT
+export POSTGRES_HOST
+export POSTGRES_PORT
+export POSTGRES_DB
+export POSTGRES_USER
+export POSTGRES_PASSWORD
 export DOCS_DIR
 export API
 export UI

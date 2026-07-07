@@ -20,12 +20,15 @@ being adapted into a local RAG/agent project.
   `workspaces/chat`, `workspaces/mcp`, and `workspaces/ui`.
 - Chat and MCP package logic lives in `packages/chat` and `packages/mcp`;
   their workspaces stay thin and handle runtime/transport concerns.
+- Infrastructure service clients and actions live in `packages/services`;
+  Postgres access is exposed from `@p/services/postgres`.
 - Project documentation lives in `docs/`; screenshots are kept in
   `docs/screenshots`.
 - The main UI is `AgentShell`, a local agent/RAG shell with Chat and Upload
   tabs.
-- The API exposes `POST /upload` for raw file uploads. It writes files into
-  `DOCS_DIR`, defaulting to `docker/docs` locally and `/app/docs` in Docker.
+- The API exposes `GET /files` for persisted uploaded file metadata and
+  `POST /upload` for raw file uploads. Uploads write files into `DOCS_DIR`,
+  defaulting to `docker/docs` locally and `/app/docs` in Docker.
 - The API also serves built UI static assets from `/static` in Docker. The UI
   workspace builds browser assets into `dist/api/static`, and the API container
   sets `UI=/static` so SSR HTML points at the in-container assets.
@@ -36,6 +39,8 @@ being adapted into a local RAG/agent project.
 - `yarn dev:api` runs `workspaces/api/bin/start.sh`.
 - `yarn dev:chat` runs `workspaces/chat/bin/start.sh`.
 - `yarn dev:mcp` runs `workspaces/mcp/bin/start.sh`.
+- `yarn dev:postgres` runs `docker compose up postgres` in the foreground, so
+  Ctrl+C stops the local Postgres container started for development.
 - `yarn dev:ui` runs `workspaces/ui/bin/start.sh`.
 - `yarn start` runs `docker compose up -d --build`.
 - `yarn stop` runs `docker compose down`.
@@ -78,6 +83,8 @@ being adapted into a local RAG/agent project.
   `/var/lib/postgresql`. This mount path matters for PostgreSQL 18 images.
 - Postgres init scripts are kept in `./docker/postgres`.
 - Current init script: `docker/postgres/init.sql`.
+- Uploaded file metadata is stored in `rag_files`; future indexing can attach
+  `rag_documents.file_id` to those uploaded files.
 - Init scripts run only when the named volume is empty.
 - pgAdmin server definitions are kept in `./docker/pgadmin/servers.json`.
 - Inside the Docker network pgAdmin connects to Postgres with host `postgres`,
@@ -120,6 +127,8 @@ being adapted into a local RAG/agent project.
   patterns.
 - Keep files small and focused. One exported runtime method or hook per file is
   ideal when it stays readable.
+- Prefer keeping shared or exported TypeScript types in the nearest existing
+  `types.ts` file instead of defining them inside runtime modules.
 - Prefer one matching test file per production code file, for example
   `feature.ts` and `feature.test.ts`.
 - Split multi-responsibility files into cohesive modules instead of growing

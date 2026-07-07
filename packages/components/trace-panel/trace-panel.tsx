@@ -1,13 +1,7 @@
 import { cn } from '@vyriy/cn';
 
+import { statusLabels } from './status-labels.js';
 import type { TracePanelType } from './types.js';
-
-const statusLabels = {
-  pending: 'Pending',
-  running: 'Running',
-  done: 'Done',
-  error: 'Error',
-};
 
 /** Renders visible application-level agent pipeline events. */
 export const TracePanel: TracePanelType = ({ events = [], className, ...props }) => {

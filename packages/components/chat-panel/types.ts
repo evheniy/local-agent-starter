@@ -1,4 +1,4 @@
-import type { ComponentProps, FC } from 'react';
+import type { ComponentProps, FC, SubmitEventHandler } from 'react';
 
 /** Props for the ChatPanel component. */
 export type ChatPanelProps = {
@@ -13,3 +13,15 @@ export type ChatPanelProps = {
 
 /** ChatPanel component type. */
 export type ChatPanelType = FC<ChatPanelProps>;
+
+/** Options for creating a ChatPanel submit handler. */
+export type HandleSubmitOptions = {
+  canSubmit: boolean;
+  isLoading: boolean;
+};
+
+/** Creates a ChatPanel submit event handler. */
+export type HandleSubmitType = (
+  onSubmit: ChatPanelProps['onSubmit'],
+  options: HandleSubmitOptions,
+) => SubmitEventHandler<HTMLFormElement>;

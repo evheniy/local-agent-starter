@@ -12,7 +12,7 @@ export default {
       storySort: {
         method: 'alphabetical',
         order: [
-          'Fullstack',
+          'Local Agent Starter',
           'Docs',
           'Workspaces',
           'Packages',
