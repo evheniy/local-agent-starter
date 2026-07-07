@@ -6,14 +6,16 @@ import {
 } from '@p/services/fs';
 import {
   createUploadedFile as createStoredUploadedFile,
+  enqueueRagIndexJob as enqueueStoredRagIndexJob,
   getUploadedFileByPath as getStoredUploadedFileByPath,
 } from '@p/services/postgres';
 
 import type { CreateUploadedFileTargetType, SaveUploadedFileType } from '@p/services/fs';
-import type { CreateUploadedFileType, GetUploadedFileByPathType } from '@p/services/postgres';
+import type { CreateUploadedFileType, EnqueueRagIndexJobType, GetUploadedFileByPathType } from '@p/services/postgres';
 
 type CreateUploadHandlerOptions = {
   createUploadedFile?: CreateUploadedFileType;
+  enqueueRagIndexJob?: EnqueueRagIndexJobType;
   saveUploadedFile?: SaveUploadedFileType;
   getUploadedFileByPath?: GetUploadedFileByPathType;
   createUploadedFileTarget?: CreateUploadedFileTargetType;
@@ -41,6 +43,7 @@ const getUploadBody = (body: string | undefined, isBase64Encoded?: boolean) => {
 
 export const createUploadHandler = ({
   createUploadedFile = createStoredUploadedFile(),
+  enqueueRagIndexJob = enqueueStoredRagIndexJob(),
   saveUploadedFile = saveStoredUploadedFile,
   getUploadedFileByPath = getStoredUploadedFileByPath(),
   createUploadedFileTarget = createStoredUploadedFileTarget,
@@ -81,6 +84,9 @@ export const createUploadHandler = ({
       size: savedFile.bytes,
       type: getHeader(headers, 'content-type'),
     });
+    const indexingJob = await enqueueRagIndexJob({
+      fileId: file.id,
+    });
 
     return {
       statusCode: 201,
@@ -90,6 +96,7 @@ export const createUploadHandler = ({
         path: savedFile.path,
         bytes: savedFile.bytes,
         file,
+        indexingJob,
       }),
     };
   };

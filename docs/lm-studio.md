@@ -9,8 +9,9 @@ Current environment variables:
 - `LLM_BASE_URL=http://host.docker.internal:1234/v1`
 - `LLM_MODEL=qwen2.5-coder-7b-instruct`
 - `EMBEDDING_PROVIDER=lmstudio`
-- `EMBEDDING_BASE_URL=http://host.docker.internal:11434`
+- `EMBEDDING_BASE_URL=http://host.docker.internal:1234`
 - `EMBEDDING_MODEL=text-embedding-qwen3-embedding-0.6b`
+- `EMBEDDING_DIMENSIONS=1024`
 
 When the API runs in Docker, `host.docker.internal` points from the container
 back to services running on the host machine.

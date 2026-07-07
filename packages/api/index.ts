@@ -1,3 +1,4 @@
 export * from './files.js';
 export * from './html.js';
+export * from './index-file.js';
 export * from './upload.js';

@@ -1,0 +1,8 @@
+{
+  "name": "@w/indexer",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "pg": "^8.22.0"
+  }
+}

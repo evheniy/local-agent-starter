@@ -1,3 +1,19 @@
+FROM node:krypton-alpine AS build
+
+WORKDIR /repo
+
+ENV NODE_ENV=production
+ENV API=/static
+ENV UI=/static
+ENV HUSKY=0
+
+COPY . .
+
+RUN corepack enable
+RUN yarn install --immutable
+RUN yarn build:ui
+RUN yarn build:api
+
 FROM node:krypton-alpine
 
 WORKDIR /app
@@ -9,7 +25,7 @@ ENV DOCS_DIR=/app/docs
 ENV POSTGRES_HOST=postgres
 ENV POSTGRES_PORT=5432
 
-COPY --chown=node:node . .
+COPY --from=build --chown=node:node /repo/dist/api ./
 
 RUN npm install --omit=dev --ignore-scripts && npm cache clean --force
 

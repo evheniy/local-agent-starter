@@ -4,6 +4,7 @@
 : "${UI_PORT:=3001}"
 : "${CHAT_PORT:=3002}"
 : "${MCP_PORT:=3003}"
+: "${INDEXER_POLL_MS:=5000}"
 : "${PG_PORT:=5432}"
 : "${POSTGRES_HOST:=localhost}"
 : "${POSTGRES_PORT:=$PG_PORT}"
@@ -20,6 +21,7 @@ export API_PORT
 export UI_PORT
 export CHAT_PORT
 export MCP_PORT
+export INDEXER_POLL_MS
 export PG_PORT
 export POSTGRES_HOST
 export POSTGRES_PORT

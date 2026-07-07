@@ -2,8 +2,8 @@
 
 Yarn workspace fullstack starter for a local RAG/agent application. The project
 contains a server-rendered API, a browser UI bundle, a streaming chat service, a
-small MCP service, shared package logic, Storybook documentation, and Docker
-Compose infrastructure for local development.
+background indexer worker, a small MCP service, shared package logic, Storybook
+documentation, and Docker Compose infrastructure for local development.
 
 ## Setup
 
@@ -27,6 +27,7 @@ Start individual workspaces:
 ```bash
 yarn dev:api
 yarn dev:chat
+yarn dev:indexer
 yarn dev:mcp
 yarn dev:postgres
 yarn dev:ui
@@ -38,6 +39,7 @@ Default local ports are defined in `workspaces/env.sh`:
 - UI dev assets: `http://localhost:3001`
 - Chat: `http://localhost:3002`
 - MCP: `http://localhost:3003`
+- Indexer: background worker with no public port
 - Postgres with pgvector: `localhost:5432`
 
 Override `API_PORT`, `UI_PORT`, `CHAT_PORT`, `MCP_PORT`, `API`, `UI`, `CHAT`,
@@ -68,6 +70,7 @@ The compose file starts:
 
 - API on `http://localhost:${API_PORT:-3000}`.
 - Chat on `http://localhost:${CHAT_PORT:-3002}`.
+- Indexer worker with no public port.
 - MCP on `http://localhost:${MCP_PORT:-3003}`.
 - Postgres with pgvector on `localhost:${PG_PORT:-5432}`.
 - pgAdmin on `http://localhost:${PGADMIN_PORT:-5433}`.
@@ -85,8 +88,10 @@ definitions live in `docker/pgadmin`.
 
 ## Workspaces
 
-- `workspaces/api` serves `GET /`, `GET /files`, `POST /upload`, and `/static/*`.
+- `workspaces/api` serves `GET /`, `GET /files`, `POST /upload`, the debug
+  `POST /files/:id/index` endpoint, and `/static/*`.
 - `workspaces/chat` serves streaming chat responses from `POST /chat`.
+- `workspaces/indexer` polls and processes queued RAG indexing jobs.
 - `workspaces/mcp` serves MCP Streamable HTTP from `POST /mcp`.
 - `workspaces/ui` builds and serves the browser entry point.
 
@@ -113,11 +118,43 @@ The API workspace exposes:
 
 - `GET /` - server-rendered `AgentShell` HTML.
 - `GET /files` - persisted uploaded file metadata from Postgres.
-- `POST /upload?filename=name.ext` - raw file upload into `DOCS_DIR`.
+- `POST /upload?filename=name.ext` - raw file upload into `DOCS_DIR`, metadata
+  persistence, and automatic background indexing job enqueue.
+- `POST /files/:id/index` - debug/retry endpoint that indexes an uploaded file
+  directly.
 - `GET /static/*` - built UI assets in Docker and production builds.
 
 `DOCS_DIR` defaults to `docker/docs` locally and `/app/docs` in Docker.
-Uploaded file metadata is stored in the `rag_files` Postgres table.
+Uploaded file metadata is stored first in the `rag_files` Postgres table.
+Uploads enqueue `rag_index_jobs` rows with status `queued`; the indexer worker
+claims those jobs, writes one `rag_documents` row and ordered `rag_chunks` rows
+with pgvector embeddings, then marks the job `completed` or `failed`.
+Re-indexing the same file replaces old chunks. For now, indexing supports
+text-like files such as Markdown, JSON, TypeScript, JavaScript, CSS, HTML,
+YAML, and CSV; PDF and DOCX parsing can be added later.
+
+Example upload flow:
+
+```bash
+curl -X POST "http://localhost:3000/upload?filename=notes.md" \
+  --data-binary @notes.md
+```
+
+Run the background indexer locally with:
+
+```bash
+yarn dev:indexer
+```
+
+Embedding configuration defaults to an OpenAI-compatible LM Studio endpoint:
+
+```env
+EMBEDDING_PROVIDER=lmstudio
+EMBEDDING_BASE_URL=http://host.docker.internal:1234
+EMBEDDING_MODEL=text-embedding-qwen3-embedding-0.6b
+EMBEDDING_DIMENSIONS=1024
+INDEXER_POLL_MS=5000
+```
 
 The chat workspace exposes:
 
@@ -145,6 +182,7 @@ Focused builds are also available:
 ```bash
 yarn build:api
 yarn build:chat
+yarn build:indexer
 yarn build:mcp
 yarn build:ui
 yarn build:storybook
@@ -152,14 +190,15 @@ yarn build:storybook
 
 The API bundle is emitted to `dist/api`. The UI build emits browser assets into
 `dist/api/static` so the API image can serve SSR HTML and static assets together.
-Chat and MCP bundles are emitted to `dist/chat` and `dist/mcp`.
+Chat, indexer, and MCP bundles are emitted to `dist/chat`, `dist/indexer`, and
+`dist/mcp`.
 
-The runtime Dockerfiles expect the matching build output to exist first. For
-example, build the API before building its image:
+Docker Compose app images use multi-stage Dockerfiles and build their bundles
+inside Docker, so running the Docker stack does not require Node or Yarn to be
+installed on the host:
 
 ```bash
-yarn build:api
-docker build -f workspaces/api/Dockerfile dist/api
+docker compose up -d --build
 ```
 
 ## Storybook

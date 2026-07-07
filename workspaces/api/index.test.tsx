@@ -31,6 +31,19 @@ const htmlMock = jest.fn(() =>
 );
 const serverMock = jest.fn();
 const staticMock = jest.fn();
+const indexFileMock = jest.fn((params: unknown) => {
+  void params;
+
+  return Promise.resolve({
+    body: JSON.stringify({
+      ok: true,
+      fileId: 'file-1',
+      documentId: 'document-1',
+      chunksCount: 2,
+    }),
+    statusCode: 200,
+  });
+});
 const uploadMock = jest.fn(() =>
   Promise.resolve({
     body: JSON.stringify({
@@ -86,6 +99,7 @@ jest.mock('@p/env', () => ({
 jest.mock('@p/api', () => ({
   files: filesMock,
   html: htmlMock,
+  indexFile: indexFileMock,
   upload: uploadMock,
 }));
 
@@ -121,6 +135,22 @@ describe('workspaces/api/index.tsx', () => {
       },
       requestContext: {},
       resource: '/upload',
+      stageVariables: null,
+    }) as unknown as APIGatewayProxyEvent;
+
+  const getIndexEvent = (): APIGatewayProxyEvent =>
+    ({
+      body: null,
+      headers: {},
+      httpMethod: 'POST',
+      isBase64Encoded: false,
+      multiValueHeaders: {},
+      multiValueQueryStringParameters: {},
+      path: '/files/file-1/index',
+      pathParameters: null,
+      queryStringParameters: null,
+      requestContext: {},
+      resource: '/files/{id}/index',
       stageVariables: null,
     }) as unknown as APIGatewayProxyEvent;
 
@@ -205,5 +235,21 @@ describe('workspaces/api/index.tsx', () => {
       statusCode: 200,
     });
     expect(filesMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes file indexing', async () => {
+    const handler = await loadHandler();
+
+    await expect(handler(getIndexEvent())).resolves.toMatchObject({
+      body: expect.stringContaining('"chunksCount":2'),
+      statusCode: 200,
+    });
+    expect(indexFileMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathParameters: {
+          id: 'file-1',
+        },
+      }),
+    );
   });
 });

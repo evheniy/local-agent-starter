@@ -16,8 +16,9 @@ being adapted into a local RAG/agent project.
   implementation files.
 - UI hooks live in `workspaces/ui/hooks`; keep one exported hook function per
   file and place its focused tests next to it.
-- API, streaming chat, MCP, and UI workspaces live in `workspaces/api`,
-  `workspaces/chat`, `workspaces/mcp`, and `workspaces/ui`.
+- API, streaming chat, indexer, MCP, and UI workspaces live in
+  `workspaces/api`, `workspaces/chat`, `workspaces/indexer`,
+  `workspaces/mcp`, and `workspaces/ui`.
 - Chat and MCP package logic lives in `packages/chat` and `packages/mcp`;
   their workspaces stay thin and handle runtime/transport concerns.
 - Infrastructure service clients and actions live in `packages/services`;
@@ -29,6 +30,10 @@ being adapted into a local RAG/agent project.
 - The API exposes `GET /files` for persisted uploaded file metadata and
   `POST /upload` for raw file uploads. Uploads write files into `DOCS_DIR`,
   defaulting to `docker/docs` locally and `/app/docs` in Docker.
+- Uploads enqueue `rag_index_jobs` rows for background indexing. The normal
+  user flow does not require calling the manual indexing endpoint.
+- `POST /files/:id/index` remains available as a direct debug/retry indexing
+  endpoint.
 - The API also serves built UI static assets from `/static` in Docker. The UI
   workspace builds browser assets into `dist/api/static`, and the API container
   sets `UI=/static` so SSR HTML points at the in-container assets.
@@ -38,6 +43,7 @@ being adapted into a local RAG/agent project.
 - `yarn dev` runs local app dev servers in parallel.
 - `yarn dev:api` runs `workspaces/api/bin/start.sh`.
 - `yarn dev:chat` runs `workspaces/chat/bin/start.sh`.
+- `yarn dev:indexer` runs `workspaces/indexer/bin/start.sh`.
 - `yarn dev:mcp` runs `workspaces/mcp/bin/start.sh`.
 - `yarn dev:postgres` runs `docker compose up postgres` in the foreground, so
   Ctrl+C stops the local Postgres container started for development.
@@ -59,17 +65,22 @@ being adapted into a local RAG/agent project.
 
 ## Docker And Database
 
-- Docker Compose defines `api`, `chat`, `mcp`, `postgres`, and `pgadmin`.
-- The `api` service is built as image `local-agent-api` from context
-  `./dist/api` using `../../workspaces/api/Dockerfile`.
-- The `chat` service is built as image `local-agent-chat` from context
-  `./dist/chat` using `../../workspaces/chat/Dockerfile`.
-- The `mcp` service is built as image `local-agent-mcp` from context
-  `./dist/mcp` using `../../workspaces/mcp/Dockerfile`.
+- Docker Compose defines `api`, `chat`, `indexer`, `mcp`, `postgres`, and
+  `pgadmin`.
+- The `api` service is built as image `local-agent-api` from repository root
+  context using `workspaces/api/Dockerfile`.
+- The `chat` service is built as image `local-agent-chat` from repository root
+  context using `workspaces/chat/Dockerfile`.
+- The `indexer` service is built as image `local-agent-indexer` from repository
+  root context using `workspaces/indexer/Dockerfile`.
+- The `mcp` service is built as image `local-agent-mcp` from repository root
+  context using `workspaces/mcp/Dockerfile`.
 - The `api` service is exposed on `${API_PORT:-3000}:3000` and waits for
   healthy Postgres.
 - The `chat` service is exposed on `${CHAT_PORT:-3002}:3000` and serves
   streaming chat responses from `/chat`.
+- The `indexer` service has no public port. It polls Postgres for queued
+  `rag_index_jobs` and shares the `./docker/docs:/app/docs` mount with the API.
 - The `mcp` service is exposed on `${MCP_PORT:-3003}:3000` and serves MCP
   Streamable HTTP from `/mcp`.
 - The `api` service mounts `./docker/docs` to `/app/docs` for uploaded demo
@@ -85,16 +96,20 @@ being adapted into a local RAG/agent project.
 - Current init script: `docker/postgres/init.sql`.
 - Uploaded file metadata is stored in `rag_files`; future indexing can attach
   `rag_documents.file_id` to those uploaded files.
+- Background indexing jobs are stored in `rag_index_jobs`; active queued/running
+  jobs are unique per file.
 - Init scripts run only when the named volume is empty.
 - pgAdmin server definitions are kept in `./docker/pgadmin/servers.json`.
 - Inside the Docker network pgAdmin connects to Postgres with host `postgres`,
   port `5432`, database `rag`, and user `rag`.
-- `workspaces/api/Dockerfile`, `workspaces/chat/Dockerfile`, and
-  `workspaces/mcp/Dockerfile` are runtime-only. Run the matching build command
-  first so each Docker context under `dist/*` contains the generated `index.js`
-  and `package.json`.
-- The runtime Dockerfiles run `npm install --omit=dev --ignore-scripts` inside
-  the image because built workspaces may still require runtime packages.
+- `workspaces/api/Dockerfile`, `workspaces/chat/Dockerfile`,
+  `workspaces/indexer/Dockerfile`, and `workspaces/mcp/Dockerfile` are
+  multi-stage Dockerfiles. Their builder stages run the matching Yarn build
+  inside Docker, then copy the generated `dist/*` output into the runtime image.
+- The API Dockerfile also runs `yarn build:ui` before `yarn build:api`, so the
+  runtime API image contains `/static` browser assets.
+- The runtime stages run `npm install --omit=dev --ignore-scripts` because built
+  workspaces may still require runtime packages.
 
 ## Environment
 
@@ -102,8 +117,8 @@ being adapted into a local RAG/agent project.
 - `.env.example` documents required local values.
 - Current important variables: `POSTGRES_DB`, `POSTGRES_USER`,
   `POSTGRES_PASSWORD`, `PG_PORT`, `PGADMIN_PORT`, `API_PORT`, `CHAT_PORT`,
-  `MCP_PORT`, `DOCS_DIR`, embedding provider settings, and chat LLM provider
-  settings.
+  `MCP_PORT`, `INDEXER_POLL_MS`, `DOCS_DIR`, embedding provider settings, and
+  chat LLM provider settings.
 
 ## Package And Workspace Conventions
 

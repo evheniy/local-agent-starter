@@ -2,8 +2,8 @@ services:
   api:
     image: local-agent-api
     build:
-      context: ./dist/api
-      dockerfile: ../../workspaces/api/Dockerfile
+      context: .
+      dockerfile: workspaces/api/Dockerfile
     container_name: api
     restart: unless-stopped
     environment:
@@ -30,8 +30,8 @@ services:
   chat:
     image: local-agent-chat
     build:
-      context: ./dist/chat
-      dockerfile: ../../workspaces/chat/Dockerfile
+      context: .
+      dockerfile: workspaces/chat/Dockerfile
     container_name: chat
     restart: unless-stopped
     environment:
@@ -43,11 +43,40 @@ services:
     networks:
       - appnet
 
+  indexer:
+    image: local-agent-indexer
+    build:
+      context: .
+      dockerfile: workspaces/indexer/Dockerfile
+    container_name: indexer
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: info
+      NODE_ENV: production
+      DOCS_DIR: /app/docs
+      INDEXER_POLL_MS: ${INDEXER_POLL_MS}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-lmstudio}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://host.docker.internal:1234}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-qwen3-embedding-0.6b}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-4096}
+    volumes:
+      - ./docker/docs:/app/docs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - appnet
+
   mcp:
     image: local-agent-mcp
     build:
-      context: ./dist/mcp
-      dockerfile: ../../workspaces/mcp/Dockerfile
+      context: .
+      dockerfile: workspaces/mcp/Dockerfile
     container_name: mcp
     restart: unless-stopped
     environment:

@@ -4,13 +4,14 @@ import { createRouter } from '@vyriy/router';
 import { path } from '@vyriy/path';
 import { withStatic } from '@vyriy/static';
 
-import { files, html, upload } from '@p/api';
+import { files, html, indexFile, upload } from '@p/api';
 
 server(
   api(async (event) =>
     withStatic(createRouter())
       .get('/', html)
       .get('/files', files)
+      .post('/files/:id/index', indexFile)
       .post('/upload', upload)
       .static('/static', path('static'), { cache: 'static' })
       .route(event),

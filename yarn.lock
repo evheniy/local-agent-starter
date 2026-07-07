@@ -6404,6 +6404,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@w/indexer@workspace:workspaces/indexer":
+  version: 0.0.0-use.local
+  resolution: "@w/indexer@workspace:workspaces/indexer"
+  dependencies:
+    pg: "npm:^8.22.0"
+  languageName: unknown
+  linkType: soft
+
 "@w/mcp@workspace:workspaces/mcp":
   version: 0.0.0-use.local
   resolution: "@w/mcp@workspace:workspaces/mcp"

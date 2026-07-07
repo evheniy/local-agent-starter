@@ -1,3 +1,16 @@
+FROM node:krypton-alpine AS build
+
+WORKDIR /repo
+
+ENV NODE_ENV=production
+ENV HUSKY=0
+
+COPY . .
+
+RUN corepack enable
+RUN yarn install --immutable
+RUN yarn build:chat
+
 FROM node:krypton-alpine
 
 WORKDIR /app
@@ -6,7 +19,7 @@ ENV PORT=3000
 ENV LOG_LEVEL=info
 ENV NODE_ENV=production
 
-COPY --chown=node:node . .
+COPY --from=build --chown=node:node /repo/dist/chat ./
 
 RUN npm install --omit=dev --ignore-scripts && npm cache clean --force
 

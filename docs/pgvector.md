@@ -15,7 +15,7 @@ It creates:
 - `rag_chunks`
 - `rag_chunks_document_id_idx`
 
-The `rag_chunks.embedding` column currently uses `VECTOR(4096)`. Keep this
+The `rag_chunks.embedding` column currently uses `VECTOR(1024)`. Keep this
 dimension aligned with the embedding model.
 
 Init scripts run only when the Postgres data directory is empty.

@@ -2,12 +2,17 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { describe, expect, it, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import type { HandlerParams } from '@vyriy/router';
 
 import { createUploadHandler } from './upload.js';
 
-import type { CreateUploadedFileType, GetUploadedFileByPathType, UploadedFile } from '@p/services/postgres';
+import type {
+  CreateUploadedFileType,
+  EnqueueRagIndexJobType,
+  GetUploadedFileByPathType,
+  UploadedFile,
+} from '@p/services/postgres';
 
 describe('upload handler', () => {
   const createUploadedFile = jest.fn<CreateUploadedFileType>(({ name, path, size, type }): Promise<UploadedFile> => {
@@ -21,7 +26,19 @@ describe('upload handler', () => {
     });
   });
   const getUploadedFileByPath = jest.fn<GetUploadedFileByPathType>(() => Promise.resolve(undefined));
-  const upload = createUploadHandler({ createUploadedFile, getUploadedFileByPath });
+  const enqueueRagIndexJob = jest.fn<EnqueueRagIndexJobType>(({ fileId }) =>
+    Promise.resolve({
+      id: `job-${fileId}`,
+      fileId,
+      status: 'queued',
+      attempts: 0,
+    }),
+  );
+  const upload = createUploadHandler({ createUploadedFile, enqueueRagIndexJob, getUploadedFileByPath });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   const createParams = (docsDir: string, body = 'hello docs'): HandlerParams => {
     process.env.DOCS_DIR = docsDir;
@@ -72,12 +89,21 @@ describe('upload handler', () => {
           size: 10,
           status: 'uploaded',
         },
+        indexingJob: {
+          id: 'job-file-AGENTS.md',
+          fileId: 'file-AGENTS.md',
+          status: 'queued',
+          attempts: 0,
+        },
       });
       expect(createUploadedFile).toHaveBeenCalledWith({
         name: 'AGENTS.md',
         path: 'docs/AGENTS.md',
         size: 10,
         type: undefined,
+      });
+      expect(enqueueRagIndexJob).toHaveBeenCalledWith({
+        fileId: 'file-AGENTS.md',
       });
       expect(getUploadedFileByPath).toHaveBeenCalledWith('docs/AGENTS.md');
       await expect(readFile(join(docsDir, 'AGENTS.md'), 'utf8')).resolves.toBe('hello docs');
@@ -115,6 +141,7 @@ describe('upload handler', () => {
     const saveUploadedFile = jest.fn(() => Promise.reject(new Error('Storage should not be called.')));
     const duplicateUpload = createUploadHandler({
       createUploadedFile,
+      enqueueRagIndexJob,
       getUploadedFileByPath: duplicateLookup,
       saveUploadedFile,
     });
@@ -139,6 +166,9 @@ describe('upload handler', () => {
     });
     expect(duplicateLookup).toHaveBeenCalledWith('docs/AGENTS.md');
     expect(saveUploadedFile).not.toHaveBeenCalled();
+    expect(enqueueRagIndexJob).not.toHaveBeenCalledWith({
+      fileId: existingFile.id,
+    });
   });
 
   it('uses upload metadata from headers and supports base64 bodies', async () => {
@@ -206,6 +236,12 @@ describe('upload handler', () => {
           size: 14,
           status: 'uploaded',
         },
+        indexingJob: {
+          id: 'job-file-upload-123.txt',
+          fileId: 'file-upload-123.txt',
+          status: 'queued',
+          attempts: 0,
+        },
       });
       await expect(readFile(filePath, 'utf8')).resolves.toBe('generated docs');
     } finally {
@@ -246,6 +282,12 @@ describe('upload handler', () => {
           path: 'docs/upload-321.txt',
           size: 10,
           status: 'uploaded',
+        },
+        indexingJob: {
+          id: 'job-file-upload-321.txt',
+          fileId: 'file-upload-321.txt',
+          status: 'queued',
+          attempts: 0,
         },
       });
       await expect(readFile(filePath, 'utf8')).resolves.toBe('local docs');
@@ -295,7 +337,11 @@ describe('upload handler', () => {
 
       await jest.isolateModulesAsync(async () => {
         const { createUploadHandler: createIsolatedUploadHandler } = await import('./upload.js');
-        const isolatedUpload = createIsolatedUploadHandler({ createUploadedFile, getUploadedFileByPath });
+        const isolatedUpload = createIsolatedUploadHandler({
+          createUploadedFile,
+          enqueueRagIndexJob,
+          getUploadedFileByPath,
+        });
 
         await isolatedUpload({
           body: 'fallback docs',
@@ -311,6 +357,29 @@ describe('upload handler', () => {
       await expect(readFile(join(docsDir, 'upload-456.txt'), 'utf8')).resolves.toBe('fallback docs');
     } finally {
       process.env.NODE_ENV = previousNodeEnv;
+      delete process.env.DOCS_DIR;
+      await rm(docsDir, { recursive: true, force: true });
+    }
+  });
+
+  it('returns after enqueueing without waiting for embedding work', async () => {
+    const docsDir = await mkdtemp(join(tmpdir(), 'local-agent-docs-'));
+    const indexUploadedFile = jest.fn(() => Promise.reject(new Error('Indexing should not run during upload.')));
+    const uploadWithoutIndexing = createUploadHandler({
+      createUploadedFile,
+      enqueueRagIndexJob,
+      getUploadedFileByPath,
+    });
+
+    try {
+      await expect(uploadWithoutIndexing(createParams(docsDir))).resolves.toMatchObject({
+        statusCode: 201,
+      });
+      expect(indexUploadedFile).not.toHaveBeenCalled();
+      expect(enqueueRagIndexJob).toHaveBeenCalledWith({
+        fileId: 'file-AGENTS.md',
+      });
+    } finally {
       delete process.env.DOCS_DIR;
       await rm(docsDir, { recursive: true, force: true });
     }
