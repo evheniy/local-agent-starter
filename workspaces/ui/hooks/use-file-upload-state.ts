@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { listFiles, uploadFile as uploadSelectedFile } from '../api/index.js';
+import { listFiles, uploadFile as uploadSelectedFile } from '@p/ui';
 import type { UseFileUploadStateResult, UseFileUploadStateType } from './types.js';
 
 const POLL_INTERVAL_MS = 2000;

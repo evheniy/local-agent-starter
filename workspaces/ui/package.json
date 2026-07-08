@@ -1,5 +1,8 @@
 {
   "name": "@w/ui",
   "type": "module",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@p/ui": "workspace:*"
+  }
 }

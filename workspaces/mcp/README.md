@@ -1,16 +1,17 @@
 # MCP Workspace
 
-Vyriy-based Streamable HTTP MCP workspace for the local agent starter.
+Streamable HTTP MCP workspace entry point for the local agent starter.
 
 ## Behavior
 
-The workspace starts an `@vyriy/server` HTTP handler and exposes:
+The workspace starts the `@p/mcp-http` server, which exposes:
 
 - `POST /mcp` for MCP Streamable HTTP requests
 - `GET /healthcheck` with service metadata
 
-MCP tool registration comes from `@p/mcp`; this workspace only owns HTTP
-transport, request handling, and runtime startup.
+MCP tool registration comes from `@p/mcp`. HTTP transport helpers and request
+handling live in `@p/mcp-http`; this workspace only starts the HTTP server and
+logs runtime startup failures.
 
 Current tool surface:
 
@@ -66,5 +67,5 @@ Docker Compose exposes the service on `${MCP_PORT}:3000`.
 yarn test:jest workspaces/mcp
 ```
 
-The tests verify HTTP handler creation, MCP request handling, JSON-RPC error
-responses, fallback responses, and startup behavior.
+The workspace tests verify entrypoint wiring. HTTP transport behavior is covered
+by `packages/mcp-http`.

@@ -1,9 +1,9 @@
+import { getLlmBaseUrl, getLlmModel } from '@p/env';
+
 import { createChatCompletionsUrl } from './createChatCompletionsUrl.js';
 
 import type { ChatCompletionStreamChunk, StreamChatCompletionInput, StreamChatCompletionType } from './types.js';
 
-const DEFAULT_LLM_BASE_URL = 'http://host.docker.internal:1234';
-const DEFAULT_LLM_MODEL = 'local-model';
 const DEFAULT_STREAM_IDLE_MS = 10_000;
 const STREAM_DONE = Symbol('STREAM_DONE');
 
@@ -120,8 +120,8 @@ async function* readStreamDeltas(body: ReadableStream<Uint8Array>, streamIdleMs:
 /** Streams chat completion deltas from an OpenAI-compatible endpoint. */
 export const streamChatCompletion: StreamChatCompletionType = async function* ({
   messages,
-  model = process.env.LLM_MODEL ?? DEFAULT_LLM_MODEL,
-  baseUrl = process.env.LLM_BASE_URL ?? DEFAULT_LLM_BASE_URL,
+  model = getLlmModel(),
+  baseUrl = getLlmBaseUrl(),
   fetch: fetchCompletion = fetch,
   streamIdleMs = DEFAULT_STREAM_IDLE_MS,
 }: StreamChatCompletionInput): AsyncGenerator<string> {

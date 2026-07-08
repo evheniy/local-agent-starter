@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { streamChat } from '../api/index.js';
+import { streamChat } from '@p/ui';
 import type { UseChatPanelStateResult, UseChatPanelStateType } from './types.js';
 import type { ChatMessage } from '@p/components/chat-panel';
 
@@ -109,8 +109,8 @@ export const useChatPanelState: UseChatPanelStateType = ({ files = [] } = {}) =>
     hasIndexedFiles,
     isLoading,
     messages,
+    onQuestionChange: setQuestion,
+    onSubmit: submitQuestion,
     question,
-    setQuestion,
-    submitQuestion,
   };
 };

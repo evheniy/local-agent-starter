@@ -12,17 +12,7 @@ const LocalAgentApp = () => {
   return (
     <AgentShell
       tab={agentShellTab.tab}
-      chatPanel={{
-        answer: chatPanel.answer,
-        canSubmit: chatPanel.canSubmit,
-        error: chatPanel.error,
-        hasIndexedFiles: chatPanel.hasIndexedFiles,
-        isLoading: chatPanel.isLoading,
-        messages: chatPanel.messages,
-        question: chatPanel.question,
-        onQuestionChange: chatPanel.setQuestion,
-        onSubmit: chatPanel.submitQuestion,
-      }}
+      chatPanel={{ ...chatPanel }}
       files={fileUpload.files}
       filesPanel={{
         isRefreshing: fileUpload.isRefreshing,

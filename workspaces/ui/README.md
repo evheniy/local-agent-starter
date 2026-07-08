@@ -14,6 +14,9 @@ The Local RAG UI provides:
 - Streaming RAG chat through `POST /chat/stream`.
 - Source previews under assistant answers.
 
+Browser API client helpers live in `@p/ui`; this workspace owns the React
+entry point, state hooks, and composition.
+
 The layout uses a documents panel for upload/status and a chat panel for
 streaming answers. The trace panel describes visible application-level steps,
 not hidden model thoughts.
@@ -74,5 +77,6 @@ the API Docker image can serve SSR HTML and static assets together.
 yarn test:jest workspaces/ui
 ```
 
-The tests verify API helpers, upload/status hooks, streaming chat state, and
-that the entry point renders the local agent shell.
+The tests verify upload/status hooks, streaming chat state, and that the entry
+point renders the local agent shell. Browser API helper behavior is covered by
+`packages/ui`.

@@ -2,11 +2,10 @@ import type { Handler } from '@vyriy/router';
 
 import { listUploadedFiles as createListUploadedFiles } from '@p/services/postgres';
 
-import type { ListUploadedFilesType } from '@p/services/postgres';
+import type { ListUploadedFiles } from './types.js';
 
-export const createFilesHandler =
-  (listUploadedFiles: ListUploadedFilesType = createListUploadedFiles()): Handler =>
-  async () => {
+export const createFilesHandler = (listUploadedFiles: ListUploadedFiles = createListUploadedFiles()): Handler => {
+  return async () => {
     const files = await listUploadedFiles();
 
     return {
@@ -16,5 +15,6 @@ export const createFilesHandler =
       }),
     };
   };
+};
 
 export const files = createFilesHandler();

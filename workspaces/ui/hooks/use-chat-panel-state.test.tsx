@@ -85,11 +85,11 @@ describe('useChatPanelState', () => {
     );
 
     act(() => {
-      result.current.setQuestion('  What is indexed?  ');
+      result.current.onQuestionChange('  What is indexed?  ');
     });
 
     await act(async () => {
-      await result.current.submitQuestion();
+      await result.current.onSubmit();
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -137,11 +137,11 @@ describe('useChatPanelState', () => {
     const { result } = renderHook(() => useChatPanelState());
 
     act(() => {
-      result.current.setQuestion('   ');
+      result.current.onQuestionChange('   ');
     });
 
     await act(async () => {
-      await result.current.submitQuestion();
+      await result.current.onSubmit();
     });
 
     expect(fetchMock).not.toHaveBeenCalled();
@@ -163,11 +163,11 @@ describe('useChatPanelState', () => {
     const { result } = renderHook(() => useChatPanelState());
 
     act(() => {
-      result.current.setQuestion('What is indexed?');
+      result.current.onQuestionChange('What is indexed?');
     });
 
     await act(async () => {
-      await result.current.submitQuestion();
+      await result.current.onSubmit();
     });
 
     expect(result.current.error).toBe('LLM offline.');
@@ -189,11 +189,11 @@ describe('useChatPanelState', () => {
     const { result } = renderHook(() => useChatPanelState());
 
     act(() => {
-      result.current.setQuestion('What is indexed?');
+      result.current.onQuestionChange('What is indexed?');
     });
 
     await act(async () => {
-      await result.current.submitQuestion();
+      await result.current.onSubmit();
     });
 
     expect(result.current.error).toBe('Stream disconnected.');
@@ -214,11 +214,11 @@ describe('useChatPanelState', () => {
     const { result } = renderHook(() => useChatPanelState());
 
     act(() => {
-      result.current.setQuestion('What is indexed?');
+      result.current.onQuestionChange('What is indexed?');
     });
 
     await act(async () => {
-      await result.current.submitQuestion();
+      await result.current.onSubmit();
     });
 
     expect(result.current.error).toBe('Network offline.');
@@ -239,11 +239,11 @@ describe('useChatPanelState', () => {
     const { result } = renderHook(() => useChatPanelState());
 
     act(() => {
-      result.current.setQuestion('What is indexed?');
+      result.current.onQuestionChange('What is indexed?');
     });
 
     await act(async () => {
-      await result.current.submitQuestion();
+      await result.current.onSubmit();
     });
 
     expect(result.current.error).toBe('Chat failed.');

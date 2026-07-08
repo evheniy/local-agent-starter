@@ -22,9 +22,9 @@ export type UseChatPanelStateResult = {
   hasIndexedFiles: boolean;
   isLoading: boolean;
   messages: ChatMessage[];
+  onQuestionChange: Dispatch<SetStateAction<string>>;
+  onSubmit: () => Promise<void>;
   question: string;
-  setQuestion: Dispatch<SetStateAction<string>>;
-  submitQuestion: () => Promise<void>;
 };
 
 /** Keeps local chat panel state. */

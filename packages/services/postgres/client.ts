@@ -1,23 +1,34 @@
 import { Pool } from 'pg';
 
+import {
+  getPostgresDatabaseUrl,
+  getPostgresDb,
+  getPostgresHost,
+  getPostgresPassword,
+  getPostgresPort,
+  getPostgresUser,
+} from '@p/env';
+
 import type { CreateClientConfigType, QueryType } from './types.js';
 
 let client: Pool | undefined;
 
 /** Creates Postgres connection options from the current environment. */
 export const createClientConfig: CreateClientConfigType = () => {
-  if (process.env.DATABASE_URL) {
+  const connectionString = getPostgresDatabaseUrl();
+
+  if (connectionString) {
     return {
-      connectionString: process.env.DATABASE_URL,
+      connectionString,
     };
   }
 
   return {
-    database: process.env.POSTGRES_DB ?? 'rag',
-    host: process.env.POSTGRES_HOST ?? 'localhost',
-    password: process.env.POSTGRES_PASSWORD ?? 'rag',
-    port: Number(process.env.POSTGRES_PORT ?? process.env.PG_PORT ?? 5432),
-    user: process.env.POSTGRES_USER ?? 'rag',
+    database: getPostgresDb(),
+    host: getPostgresHost(),
+    password: getPostgresPassword(),
+    port: getPostgresPort(),
+    user: getPostgresUser(),
   };
 };
 

@@ -6,11 +6,7 @@ import {
   UploadedFileNotFoundError,
 } from '@p/services';
 
-import type { IndexUploadedFileType } from '@p/services';
-
-type CreateIndexFileHandlerOptions = {
-  indexUploadedFile?: IndexUploadedFileType;
-};
+import type { CreateIndexFileHandlerOptions } from './types.js';
 
 const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Indexing failed.');
 

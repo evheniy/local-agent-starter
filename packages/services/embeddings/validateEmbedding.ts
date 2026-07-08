@@ -1,4 +1,6 @@
-const getExpectedDimensions = (dimensions?: number) => Number(dimensions ?? process.env.EMBEDDING_DIMENSIONS ?? 1024);
+import { getEmbeddingDimensions } from '@p/env';
+
+const getExpectedDimensions = (dimensions?: number) => dimensions ?? getEmbeddingDimensions();
 
 /** Validates an embedding before it is stored in pgvector. */
 export const validateEmbedding = (embedding: unknown, dimensions?: number): number[] => {

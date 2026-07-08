@@ -1,0 +1,11 @@
+{
+  "name": "@p/mcp-http",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@p/mcp": "workspace:*",
+    "@vyriy/server": "^0.9.1",
+    "zod": "^4.4.3"
+  }
+}

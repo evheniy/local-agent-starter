@@ -1,6 +1,10 @@
-import { startHttpServer } from './server.js';
+import { createLogger } from '@vyriy/logger';
+
+import { startHttpServer } from '@p/mcp-http';
+
+const logger = createLogger();
 
 void startHttpServer().catch((error: unknown) => {
-  console.error(error);
+  logger.error(error);
   process.exitCode = 1;
 });

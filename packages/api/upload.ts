@@ -10,16 +10,7 @@ import {
   getUploadedFileByPath as getStoredUploadedFileByPath,
 } from '@p/services/postgres';
 
-import type { CreateUploadedFileTargetType, SaveUploadedFileType } from '@p/services/fs';
-import type { CreateUploadedFileType, EnqueueRagIndexJobType, GetUploadedFileByPathType } from '@p/services/postgres';
-
-type CreateUploadHandlerOptions = {
-  createUploadedFile?: CreateUploadedFileType;
-  enqueueRagIndexJob?: EnqueueRagIndexJobType;
-  saveUploadedFile?: SaveUploadedFileType;
-  getUploadedFileByPath?: GetUploadedFileByPathType;
-  createUploadedFileTarget?: CreateUploadedFileTargetType;
-};
+import type { CreateUploadHandlerOptions } from './types.js';
 
 const getHeader = (headers: Record<string, string | undefined> | undefined, name: string) => {
   const normalizedName = name.toLowerCase();

@@ -3,8 +3,7 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "pg": "^8.22.0",
-    "zod": "^4.4.3"
+    "@p/mcp-http": "workspace:*",
+    "@vyriy/logger": "^0.9.1"
   }
 }

@@ -3,16 +3,11 @@ import { z } from 'zod';
 import { retrieveRelevantChunks as retrieveStoredRelevantChunks } from '@p/services';
 import { jsonToolResult } from './results.js';
 
-import type { ToolDefinition } from './types.js';
-import type { RetrieveRelevantChunksType } from '@p/services';
+import type { CreateSearchDocumentsToolOptions, ToolDefinition } from './types.js';
 
 const inputSchema = {
   query: z.string().trim().min(1),
   limit: z.number().int().min(1).max(10).optional(),
-};
-
-type CreateSearchDocumentsToolOptions = {
-  retrieveRelevantChunks?: RetrieveRelevantChunksType;
 };
 
 export const createSearchDocumentsTool = ({

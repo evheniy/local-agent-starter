@@ -3,16 +3,11 @@ import { z } from 'zod';
 import { ragChat as runStoredRagChat } from '@p/services';
 import { jsonToolResult } from './results.js';
 
-import type { ToolDefinition } from './types.js';
-import type { RagChatType } from '@p/services';
+import type { CreateAskDocumentsToolOptions, ToolDefinition } from './types.js';
 
 const inputSchema = {
   question: z.string().trim().min(1),
   limit: z.number().int().min(1).max(10).optional(),
-};
-
-type CreateAskDocumentsToolOptions = {
-  ragChat?: RagChatType;
 };
 
 export const createAskDocumentsTool = ({ ragChat = runStoredRagChat }: CreateAskDocumentsToolOptions = {}) =>

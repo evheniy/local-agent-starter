@@ -37,8 +37,8 @@ jest.mock('./hooks/index.js', () => ({
     isLoading: false,
     messages: [],
     question: 'question',
-    setQuestion: mockSetQuestion,
-    submitQuestion: mockSubmitQuestion,
+    onQuestionChange: mockSetQuestion,
+    onSubmit: mockSubmitQuestion,
   }),
   useFileUploadState: () => ({
     error: undefined,

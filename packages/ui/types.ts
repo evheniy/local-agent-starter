@@ -1,11 +1,20 @@
-import type { IndexedFile } from '@p/components/indexed-files-list';
+export type UploadedFile = {
+  id: string;
+  name: string;
+  path?: string;
+  size?: number;
+  type?: string;
+  status: 'uploaded' | 'indexing' | 'indexed' | 'error';
+  chunksCount?: number;
+  error?: string;
+};
 
 export type FilesResponse = {
-  files: IndexedFile[];
+  files: UploadedFile[];
 };
 
 export type UploadFileResponse = {
-  file: IndexedFile;
+  file: UploadedFile;
 };
 
 export type ChatStreamSource = {
@@ -28,4 +37,12 @@ export type StreamChatInput = {
   limit?: number;
   handlers: ChatStreamHandlers;
   signal?: AbortSignal;
+};
+
+export type StreamChatRequest = Required<Pick<StreamChatInput, 'handlers' | 'message'>> &
+  Pick<StreamChatInput, 'limit' | 'signal'>;
+
+export type StreamEvent = {
+  event: string;
+  data: unknown;
 };

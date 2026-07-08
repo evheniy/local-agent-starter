@@ -2,16 +2,7 @@ import type { Handler } from '@vyriy/router';
 
 import { ragChat as runStoredRagChat } from '@p/services';
 
-import type { RagChatType } from '@p/services';
-
-type CreateChatHandlerOptions = {
-  ragChat?: RagChatType;
-};
-
-type ChatRequestBody = {
-  message?: unknown;
-  limit?: unknown;
-};
+import type { ChatRequestBody, CreateChatHandlerOptions } from './types.js';
 
 const parseRequestBody = (body: string | undefined): ChatRequestBody => {
   if (!body) {

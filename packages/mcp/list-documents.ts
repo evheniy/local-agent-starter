@@ -3,8 +3,7 @@ import { z } from 'zod';
 import { listUploadedFiles as listStoredUploadedFiles } from '@p/services';
 import { jsonToolResult } from './results.js';
 
-import type { ToolDefinition } from './types.js';
-import type { ListUploadedFilesType } from '@p/services';
+import type { CreateListDocumentsToolOptions, ToolDefinition } from './types.js';
 
 const inputSchema = {
   status: z
@@ -15,10 +14,6 @@ const inputSchema = {
       'error',
     ])
     .optional(),
-};
-
-type CreateListDocumentsToolOptions = {
-  listUploadedFiles?: ListUploadedFilesType;
 };
 
 export const createListDocumentsTool = ({

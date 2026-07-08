@@ -1,6 +1,5 @@
+import { getIndexerPollMs, isTest } from '@p/env';
 import { processNextIndexJob } from '@p/services';
-
-const DEFAULT_POLL_MS = 5000;
 
 export type IndexerLoopOptions = {
   pollMs?: number;
@@ -15,11 +14,9 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-const getPollMs = () => Number(process.env.INDEXER_POLL_MS ?? DEFAULT_POLL_MS);
-
 export const createIndexerLoop =
   ({
-    pollMs = getPollMs(),
+    pollMs = getIndexerPollMs(),
     processNext = processNextIndexJob,
     sleep: wait = sleep,
     shouldContinue = () => true,
@@ -46,6 +43,6 @@ export const startIndexer = (options?: IndexerLoopOptions) => createIndexerLoop(
 
 /* istanbul ignore if -- runtime entrypoint */
 /* c8 ignore next 3 -- runtime entrypoint */
-if (process.env.NODE_ENV !== 'test') {
+if (!isTest()) {
   void startIndexer();
 }

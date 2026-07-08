@@ -4067,7 +4067,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@p/mcp@workspace:packages/mcp":
+"@p/mcp-http@workspace:*, @p/mcp-http@workspace:packages/mcp-http":
+  version: 0.0.0-use.local
+  resolution: "@p/mcp-http@workspace:packages/mcp-http"
+  dependencies:
+    "@modelcontextprotocol/sdk": "npm:^1.29.0"
+    "@p/mcp": "workspace:*"
+    "@vyriy/server": "npm:^0.9.1"
+    zod: "npm:^4.4.3"
+  languageName: unknown
+  linkType: soft
+
+"@p/mcp@workspace:*, @p/mcp@workspace:packages/mcp":
   version: 0.0.0-use.local
   resolution: "@p/mcp@workspace:packages/mcp"
   dependencies:
@@ -4081,6 +4092,12 @@ __metadata:
   resolution: "@p/services@workspace:packages/services"
   dependencies:
     pg: "npm:^8.22.0"
+  languageName: unknown
+  linkType: soft
+
+"@p/ui@workspace:*, @p/ui@workspace:packages/ui":
+  version: 0.0.0-use.local
+  resolution: "@p/ui@workspace:packages/ui"
   languageName: unknown
   linkType: soft
 
@@ -6193,7 +6210,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vyriy/logger@npm:0.9.1":
+"@vyriy/logger@npm:0.9.1, @vyriy/logger@npm:^0.9.1":
   version: 0.9.1
   resolution: "@vyriy/logger@npm:0.9.1"
   checksum: 10c0/759b56c5b9a2d0e5de6f35e58ff6cd7b4cb0e3240ae31974272b67896163790abfb02da6bd1146ab6b962629347ffbcfc08d3076325ef37392bb390572941bd5
@@ -6418,15 +6435,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@w/mcp@workspace:workspaces/mcp"
   dependencies:
-    "@modelcontextprotocol/sdk": "npm:^1.29.0"
-    pg: "npm:^8.22.0"
-    zod: "npm:^4.4.3"
+    "@p/mcp-http": "workspace:*"
+    "@vyriy/logger": "npm:^0.9.1"
   languageName: unknown
   linkType: soft
 
 "@w/ui@workspace:workspaces/ui":
   version: 0.0.0-use.local
   resolution: "@w/ui@workspace:workspaces/ui"
+  dependencies:
+    "@p/ui": "workspace:*"
   languageName: unknown
   linkType: soft
 
