@@ -1,6 +1,6 @@
 # Demo
 
-<video controls src="./screenshots/demo-flow.webm" width="100%"></video>
+<video controls src="/screenshots/demo-flow.webm" width="100%"></video>
 
 This demo records a clean Docker Compose run of the local RAG shell with LM
 Studio providing the embedding and chat models.
@@ -19,22 +19,22 @@ Studio providing the embedding and chat models.
 
 ## Screenshots
 
-![Home screen](./screenshots/demo-01-home.png)
+![Home screen](/screenshots/demo-01-home.png)
 
-![Upload tab before selecting a file](./screenshots/demo-02-upload-empty.png)
+![Upload tab before selecting a file](/screenshots/demo-02-upload-empty.png)
 
-![Selected demo document](./screenshots/demo-03-file-selected.png)
+![Selected demo document](/screenshots/demo-03-file-selected.png)
 
-![Uploaded file while indexing](./screenshots/demo-04-uploaded-indexing.png)
+![Uploaded file while indexing](/screenshots/demo-04-uploaded-indexing.png)
 
-![Indexed file ready for chat](./screenshots/demo-05-indexed-ready.png)
+![Indexed file ready for chat](/screenshots/demo-05-indexed-ready.png)
 
-![Question prepared in the chat tab](./screenshots/demo-06-question.png)
+![Question prepared in the chat tab](/screenshots/demo-06-question.png)
 
-![Grounded answer with sources](./screenshots/demo-07-answer.png)
+![Grounded answer with sources](/screenshots/demo-07-answer.png)
 
 ## Mobile
 
-![Mobile chat tab](./screenshots/demo-mobile-chat.png)
+![Mobile chat tab](/screenshots/demo-mobile-chat.png)
 
-![Mobile upload tab](./screenshots/demo-mobile-upload.png)
+![Mobile upload tab](/screenshots/demo-mobile-upload.png)
