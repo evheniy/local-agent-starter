@@ -4,6 +4,8 @@ import { formatFileSize } from './format-file-size.js';
 import { statusLabels } from './status-labels.js';
 import type { FileUploadPanelType } from './types.js';
 
+const ACCEPTED_DOCUMENT_TYPES = '.txt,.md,.mdx,.json,.ts,.tsx,.js,.jsx,.css,.scss,.html,.xml,.yml,.yaml,.csv';
+
 /** Renders a local file picker ready for future ingest API wiring. */
 export const FileUploadPanel: FileUploadPanelType = ({
   file,
@@ -24,6 +26,7 @@ export const FileUploadPanel: FileUploadPanelType = ({
           id="agent-file"
           className="file-upload-panel__input"
           type="file"
+          accept={ACCEPTED_DOCUMENT_TYPES}
           onChange={(event) => onFileChange?.(event.target.files?.[0])}
         />
       </div>

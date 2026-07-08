@@ -19,6 +19,7 @@ ENV LOG_LEVEL=info
 ENV NODE_ENV=production
 ENV INDEXER_POLL_MS=5000
 
+COPY --from=build --chown=node:node /repo/package.json ./
 COPY --from=build --chown=node:node /repo/dist/indexer ./
 
 RUN npm install --omit=dev --ignore-scripts && npm cache clean --force

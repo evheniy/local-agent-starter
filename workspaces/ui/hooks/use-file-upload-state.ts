@@ -1,22 +1,31 @@
 import { useEffect, useState } from 'react';
-import { request } from '@vyriy/request';
 
+import { listFiles, uploadFile as uploadSelectedFile } from '../api/index.js';
 import type { UseFileUploadStateResult, UseFileUploadStateType } from './types.js';
+
+const POLL_INTERVAL_MS = 2000;
+
+const shouldPollFiles = (files: UseFileUploadStateResult['files']) =>
+  files.some((file) => file.status === 'uploaded' || file.status === 'indexing');
+
+const getErrorMessage = (error: unknown, fallback: string) => (error instanceof Error ? error.message : fallback);
 
 export const useFileUploadState: UseFileUploadStateType = () => {
   const [error, setError] = useState<UseFileUploadStateResult['error']>();
   const [file, setFile] = useState<UseFileUploadStateResult['file']>();
   const [files, setFiles] = useState<UseFileUploadStateResult['files']>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [status, setStatus] = useState<UseFileUploadStateResult['status']>('idle');
 
   const syncFiles = async () => {
-    try {
-      const filesUrl = new URL('/files', process.env.API);
-      const response = await request<{ files: UseFileUploadStateResult['files'] }>(filesUrl.toString());
+    setIsRefreshing(true);
 
-      setFiles(response.files);
+    try {
+      setFiles(await listFiles());
     } catch (syncError) {
-      setError(syncError instanceof Error ? syncError.message : 'Could not load uploaded files.');
+      setError(getErrorMessage(syncError, 'Could not load uploaded files.'));
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -28,7 +37,7 @@ export const useFileUploadState: UseFileUploadStateType = () => {
     setError(undefined);
     setStatus('uploading');
 
-    const optimisticFile = {
+    const optimisticFile: UseFileUploadStateResult['files'][number] = {
       id: `optimistic-${file.name}-${file.size}-${file.lastModified}`,
       name: file.name,
       size: file.size,
@@ -39,23 +48,15 @@ export const useFileUploadState: UseFileUploadStateType = () => {
     setFiles((items) => [optimisticFile, ...items]);
 
     try {
-      const uploadUrl = new URL('/upload', process.env.API);
+      const uploadedFile = await uploadSelectedFile(file);
 
-      uploadUrl.searchParams.set('filename', file.name);
-
-      const response = await request<{ file: UseFileUploadStateResult['files'][number] }>(uploadUrl.toString(), {
-        method: 'POST',
-        headers: {
-          'content-type': file.type || 'application/octet-stream',
-        },
-        body: file,
-      });
-
-      setFiles((items) => items.map((item) => (item.id === optimisticFile.id ? response.file : item)));
+      setFiles((items) => items.map((item) => (item.id === optimisticFile.id ? uploadedFile : item)));
       setStatus('success');
+      setFile(undefined);
+      await syncFiles();
     } catch (uploadError) {
       setFiles((items) => items.filter((item) => item.id !== optimisticFile.id));
-      setError(uploadError instanceof Error ? uploadError.message : 'Upload failed.');
+      setError(getErrorMessage(uploadError, 'Upload failed.'));
       setStatus('error');
     }
   };
@@ -64,10 +65,23 @@ export const useFileUploadState: UseFileUploadStateType = () => {
     void Promise.resolve().then(syncFiles);
   }, []);
 
+  useEffect(() => {
+    if (!shouldPollFiles(files)) {
+      return undefined;
+    }
+
+    const interval = window.setInterval(() => {
+      void syncFiles();
+    }, POLL_INTERVAL_MS);
+
+    return () => window.clearInterval(interval);
+  }, [files]);
+
   return {
     error,
     file,
     files,
+    isRefreshing,
     setFile,
     status,
     syncFiles,

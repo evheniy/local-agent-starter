@@ -2,7 +2,10 @@ import type { z } from 'zod';
 import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
+import { askDocumentsTool } from './ask-documents.js';
+import { listDocumentsTool } from './list-documents.js';
 import { pingTool } from './ping.js';
+import { searchDocumentsTool } from './search-documents.js';
 import type { ToolDefinition } from './types.js';
 
 const registerTool = <Input extends z.ZodRawShape>(server: McpServer, tool: ToolDefinition<Input>) => {
@@ -25,6 +28,9 @@ export const createMcpServer = () => {
   });
 
   registerTool(server, pingTool);
+  registerTool(server, listDocumentsTool);
+  registerTool(server, searchDocumentsTool);
+  registerTool(server, askDocumentsTool);
 
   return server;
 };

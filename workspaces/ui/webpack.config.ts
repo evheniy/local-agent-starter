@@ -13,7 +13,11 @@ export default csr(
     ...config,
     plugins: [
       ...(config.plugins ?? []),
-      new EnvironmentPlugin(['API', 'UI']),
+      new EnvironmentPlugin({
+        API: undefined,
+        CHAT: undefined,
+        UI: undefined,
+      }),
       html({
         htmlAttributes: 'lang="en"',
         title: '<title>Demo</title>',

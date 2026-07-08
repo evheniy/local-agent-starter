@@ -88,8 +88,9 @@ definitions live in `docker/pgadmin`.
 
 ## Workspaces
 
-- `workspaces/api` serves `GET /`, `GET /files`, `POST /upload`, the debug
-  `POST /files/:id/index` endpoint, and `/static/*`.
+- `workspaces/api` serves `GET /`, `GET /files`, non-streaming RAG
+  `POST /chat`, `POST /upload`, the debug `POST /files/:id/index` endpoint,
+  and `/static/*`.
 - `workspaces/chat` serves streaming chat responses from `POST /chat`.
 - `workspaces/indexer` polls and processes queued RAG indexing jobs.
 - `workspaces/mcp` serves MCP Streamable HTTP from `POST /mcp`.
@@ -112,12 +113,40 @@ Components in `packages/components` should stay presentational and controlled by
 props. Workspace entry points and hooks own state, effects, and API wiring.
 Demo data belongs in Storybook stories.
 
+## Local RAG UI
+
+The browser UI is a small local document assistant. It can upload text-like
+documents, show automatic indexing status, ask questions over indexed files,
+stream assistant answers, and show compact source previews.
+
+Run the UI locally with:
+
+```bash
+yarn dev:ui
+```
+
+For the full RAG flow, also run the API, Postgres, indexer, chat service, a
+local embedding model, and a local chat LLM. The combined development command is:
+
+```bash
+yarn dev
+```
+
+Manual UI flow:
+
+1. Open `http://localhost:3001`.
+2. Upload `notes.md`.
+3. Wait for the file status to become Ready.
+4. Ask `What does this document say?`.
+5. Confirm the answer streams and sources appear under the assistant message.
+
 ## API Surface
 
 The API workspace exposes:
 
 - `GET /` - server-rendered `AgentShell` HTML.
 - `GET /files` - persisted uploaded file metadata from Postgres.
+- `POST /chat` - non-streaming RAG chat over indexed uploaded files.
 - `POST /upload?filename=name.ext` - raw file upload into `DOCS_DIR`, metadata
   persistence, and automatic background indexing job enqueue.
 - `POST /files/:id/index` - debug/retry endpoint that indexes an uploaded file
@@ -146,6 +175,14 @@ Run the background indexer locally with:
 yarn dev:indexer
 ```
 
+Ask over indexed files with:
+
+```bash
+curl -X POST "http://localhost:3000/chat" \
+  -H "content-type: application/json" \
+  -d '{"message":"What does notes.md say?","limit":5}'
+```
+
 Embedding configuration defaults to an OpenAI-compatible LM Studio endpoint:
 
 ```env
@@ -156,18 +193,42 @@ EMBEDDING_DIMENSIONS=1024
 INDEXER_POLL_MS=5000
 ```
 
+The API `POST /chat` route also uses `EMBEDDING_BASE_URL`,
+`EMBEDDING_MODEL`, `LLM_BASE_URL`, and `LLM_MODEL` to retrieve indexed chunks
+and call a non-streaming OpenAI-compatible chat completions endpoint.
+
 The chat workspace exposes:
 
 - `POST /chat` - `text/event-stream` response with thinking, delta, and final
   events.
+- `POST /chat/stream` - RAG `text/event-stream` response with `sources`,
+  `answer_delta`, `done`, and `error` events.
 - `GET /healthcheck` - service metadata.
+
+Manual streaming RAG test:
+
+```bash
+curl -N \
+  -H "content-type: application/json" \
+  -H "accept: text/event-stream" \
+  -X POST "http://localhost:3002/chat/stream" \
+  -d '{"message":"What does this document say?","limit":5}'
+```
 
 The MCP workspace exposes:
 
 - `POST /mcp` - MCP Streamable HTTP endpoint.
 - `GET /healthcheck` - service metadata.
 
-The current MCP tool surface contains a `ping` tool that returns `pong`.
+The MCP server is Vyriy-based and exposes these read-only tools:
+
+- `ping` - checks that the MCP server is alive.
+- `list_documents` - lists uploaded local documents with indexing status and
+  chunk counts.
+- `search_documents` - searches indexed local documents and returns matching
+  chunks with scores and source metadata.
+- `ask_documents` - asks a non-streaming RAG question over indexed local
+  documents and returns compact sources.
 
 ## Build
 
@@ -258,7 +319,7 @@ Project-specific notes live in `docs/`:
 
 - [Architecture](docs/architecture.md)
 - [Concepts](docs/concepts.md)
+- [Demo](docs/demo.md)
 - [LM Studio](docs/lm-studio.md)
 - [MCP](docs/mcp.md)
-- [Ollama](docs/ollama.md)
 - [pgvector](docs/pgvector.md)

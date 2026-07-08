@@ -6,8 +6,8 @@ import { useAgentShellTab, useChatPanelState, useFileUploadState } from './hooks
 
 const LocalAgentApp = () => {
   const agentShellTab = useAgentShellTab();
-  const chatPanel = useChatPanelState();
   const fileUpload = useFileUploadState();
+  const chatPanel = useChatPanelState({ files: fileUpload.files });
 
   return (
     <AgentShell
@@ -16,12 +16,18 @@ const LocalAgentApp = () => {
         answer: chatPanel.answer,
         canSubmit: chatPanel.canSubmit,
         error: chatPanel.error,
+        hasIndexedFiles: chatPanel.hasIndexedFiles,
         isLoading: chatPanel.isLoading,
+        messages: chatPanel.messages,
         question: chatPanel.question,
         onQuestionChange: chatPanel.setQuestion,
         onSubmit: chatPanel.submitQuestion,
       }}
       files={fileUpload.files}
+      filesPanel={{
+        isRefreshing: fileUpload.isRefreshing,
+        onRefresh: fileUpload.syncFiles,
+      }}
       traceEvents={[]}
       uploadPanel={{
         error: fileUpload.error,

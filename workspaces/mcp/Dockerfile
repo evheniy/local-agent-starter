@@ -19,6 +19,7 @@ ENV PORT=3000
 ENV LOG_LEVEL=info
 ENV NODE_ENV=production
 
+COPY --from=build --chown=node:node /repo/package.json ./
 COPY --from=build --chown=node:node /repo/dist/mcp ./
 
 RUN npm install --omit=dev --ignore-scripts && npm cache clean --force

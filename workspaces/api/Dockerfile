@@ -3,7 +3,7 @@ FROM node:krypton-alpine AS build
 WORKDIR /repo
 
 ENV NODE_ENV=production
-ENV API=/static
+ENV CHAT=http://localhost:3002
 ENV UI=/static
 ENV HUSKY=0
 
@@ -25,6 +25,7 @@ ENV DOCS_DIR=/app/docs
 ENV POSTGRES_HOST=postgres
 ENV POSTGRES_PORT=5432
 
+COPY --from=build --chown=node:node /repo/package.json ./
 COPY --from=build --chown=node:node /repo/dist/api ./
 
 RUN npm install --omit=dev --ignore-scripts && npm cache clean --force

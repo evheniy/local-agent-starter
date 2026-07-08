@@ -16,6 +16,7 @@ import {
   getUploadedFileByPath,
   listUploadedFiles,
   markUploadedFileIndexed,
+  searchRagChunks,
   updateUploadedFileStatus,
 } from './actions.js';
 
@@ -116,6 +117,38 @@ describe('postgres actions', () => {
       },
     ]);
     expect(query).toHaveBeenNthCalledWith(5, expect.stringContaining('FROM rag_files'));
+  });
+
+  it('lists uploaded file metadata by status', async () => {
+    const query = jest.fn<QueryType>();
+
+    mockEnsureUploadedFilesSchema(query);
+    query.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 7,
+          name: 'indexed.md',
+          path: 'docs/indexed.md',
+          size: null,
+          type: null,
+          status: 'indexed',
+          chunks_count: 3,
+          created_at: '2026-07-07T10:00:00.000Z',
+        },
+      ],
+    });
+
+    await expect(listUploadedFiles(query)({ status: 'indexed' })).resolves.toEqual([
+      {
+        id: '7',
+        name: 'indexed.md',
+        path: 'docs/indexed.md',
+        status: 'indexed',
+        chunksCount: 3,
+        createdAt: '2026-07-07T10:00:00.000Z',
+      },
+    ]);
+    expect(query).toHaveBeenNthCalledWith(5, expect.stringContaining('WHERE status = $1'), ['indexed']);
   });
 
   it('finds uploaded file metadata by path', async () => {
@@ -398,6 +431,58 @@ describe('postgres actions', () => {
       JSON.stringify({
         startOffset: 0,
       }),
+    ]);
+  });
+
+  it('searches indexed RAG chunks by vector similarity', async () => {
+    const query = jest.fn<QueryType>().mockResolvedValue({ rows: [] });
+
+    query.mockResolvedValueOnce({ rows: [] });
+    query.mockResolvedValueOnce({ rows: [] });
+    query.mockResolvedValueOnce({ rows: [] });
+    query.mockResolvedValueOnce({ rows: [] });
+    query.mockResolvedValueOnce({ rows: [] });
+    query.mockResolvedValueOnce({ rows: [] });
+    query.mockResolvedValueOnce({ rows: [] });
+    query.mockResolvedValueOnce({ rows: [] });
+    query.mockResolvedValueOnce({ rows: [] });
+    query.mockResolvedValueOnce({ rows: [] });
+    query.mockResolvedValueOnce({
+      rows: [
+        {
+          document_title: null,
+          source: 'notes.md',
+          path: 'docs/notes.md',
+          chunk_index: '2',
+          score: '0.82',
+          content: 'retrieved content',
+        },
+      ],
+    });
+
+    await expect(
+      searchRagChunks(query)({
+        embedding: [
+          0.1,
+          0.2,
+        ],
+        limit: 5,
+      }),
+    ).resolves.toEqual([
+      {
+        documentTitle: 'notes.md',
+        path: 'docs/notes.md',
+        chunkIndex: 2,
+        score: 0.82,
+        content: 'retrieved content',
+      },
+    ]);
+    expect(query).toHaveBeenLastCalledWith(expect.stringContaining("WHERE f.status = 'indexed'"), [
+      JSON.stringify([
+        0.1,
+        0.2,
+      ]),
+      5,
     ]);
   });
 

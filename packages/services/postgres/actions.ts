@@ -21,6 +21,9 @@ import type {
   RagDocumentRow,
   RagIndexJob,
   RagIndexJobRow,
+  RetrievedRagChunk,
+  RetrievedRagChunkRow,
+  SearchRagChunksType,
   UpdateUploadedFileStatusType,
   UploadedFile,
   UploadedFileRow,
@@ -34,6 +37,7 @@ const mapUploadedFile = (row: UploadedFileRow): UploadedFile => ({
   type: row.type ?? undefined,
   status: row.status,
   chunksCount: row.chunks_count ?? undefined,
+  createdAt: row.created_at ? new Date(row.created_at).toISOString() : undefined,
 });
 
 const mapRagDocument = (row: RagDocumentRow): RagDocument => ({
@@ -51,6 +55,14 @@ const mapRagIndexJob = (row: RagIndexJobRow): RagIndexJob => ({
   status: row.status,
   attempts: row.attempts === null ? 0 : Number(row.attempts),
   error: row.error ?? undefined,
+});
+
+const mapRetrievedRagChunk = (row: RetrievedRagChunkRow): RetrievedRagChunk => ({
+  documentTitle: row.document_title ?? row.source,
+  path: row.path,
+  chunkIndex: Number(row.chunk_index),
+  score: Number(row.score),
+  content: row.content,
 });
 
 /** Ensures uploaded file metadata schema exists. */
@@ -204,14 +216,24 @@ export const getUploadedFileById =
 /** Lists uploaded file metadata ordered newest first. */
 export const listUploadedFiles =
   (queryDatabase: QueryType = query): ListUploadedFilesType =>
-  async () => {
+  async (input = {}) => {
     await ensureUploadedFilesSchema(queryDatabase)();
 
-    const result = await queryDatabase(`
-      SELECT id, name, path, size, type, status, chunks_count
-      FROM rag_files
-      ORDER BY created_at DESC, id DESC
-    `);
+    const result = input.status
+      ? await queryDatabase(
+          `
+            SELECT id, name, path, size, type, status, chunks_count, created_at
+            FROM rag_files
+            WHERE status = $1
+            ORDER BY created_at DESC, id DESC
+          `,
+          [input.status],
+        )
+      : await queryDatabase(`
+        SELECT id, name, path, size, type, status, chunks_count, created_at
+        FROM rag_files
+        ORDER BY created_at DESC, id DESC
+      `);
 
     return (result.rows as UploadedFileRow[]).map(mapUploadedFile);
   };
@@ -313,6 +335,37 @@ export const createRagChunk =
         JSON.stringify(metadata),
       ],
     );
+  };
+
+/** Searches indexed chunks using pgvector cosine distance. */
+export const searchRagChunks =
+  (queryDatabase: QueryType = query): SearchRagChunksType =>
+  async ({ embedding, limit }) => {
+    await ensureRagIndexSchema(queryDatabase)();
+
+    const result = await queryDatabase(
+      `
+        SELECT
+          d.title AS document_title,
+          d.source,
+          d.path,
+          c.chunk_index,
+          c.content,
+          1 - (c.embedding <=> $1::vector) AS score
+        FROM rag_chunks c
+        INNER JOIN rag_documents d ON d.id = c.document_id
+        INNER JOIN rag_files f ON f.id = d.file_id
+        WHERE f.status = 'indexed'
+        ORDER BY c.embedding <=> $1::vector ASC
+        LIMIT $2
+      `,
+      [
+        JSON.stringify(embedding),
+        limit,
+      ],
+    );
+
+    return (result.rows as RetrievedRagChunkRow[]).map(mapRetrievedRagChunk);
   };
 
 /** Enqueues a RAG indexing job, returning an existing active job when present. */

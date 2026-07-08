@@ -15,7 +15,14 @@ describe('services public API', () => {
     expect(publicApi.getUploadedFileByPath).toBeDefined();
     expect(publicApi.listUploadedFiles).toBeDefined();
     expect(publicApi.markUploadedFileIndexed).toBeDefined();
+    expect(publicApi.searchRagChunks).toBeDefined();
     expect(publicApi.updateUploadedFileStatus).toBeDefined();
+  });
+
+  it('exports chat services', () => {
+    expect(publicApi.buildRagPrompt).toBeDefined();
+    expect(publicApi.createRagChat).toBeDefined();
+    expect(publicApi.ragChat).toBeDefined();
   });
 
   it('exports fs services', () => {
@@ -29,6 +36,12 @@ describe('services public API', () => {
     expect(publicApi.validateEmbedding).toBeDefined();
   });
 
+  it('exports LLM services', () => {
+    expect(publicApi.createChatCompletion).toBeDefined();
+    expect(publicApi.createChatCompletionsUrl).toBeDefined();
+    expect(publicApi.validateChatCompletion).toBeDefined();
+  });
+
   it('exports document services', () => {
     expect(publicApi.createIndexUploadedFile).toBeDefined();
     expect(publicApi.indexUploadedFile).toBeDefined();
@@ -39,5 +52,10 @@ describe('services public API', () => {
   it('exports indexer services', () => {
     expect(publicApi.createProcessNextIndexJob).toBeDefined();
     expect(publicApi.processNextIndexJob).toBeDefined();
+  });
+
+  it('exports retrieval services', () => {
+    expect(publicApi.createRetrieveRelevantChunks).toBeDefined();
+    expect(publicApi.retrieveRelevantChunks).toBeDefined();
   });
 });

@@ -14,10 +14,13 @@ export const AgentTabs: AgentTabsType = ({ value, onValueChange, className, ...p
       {tabs.map((tab) => (
         <button
           key={tab.value}
+          id={`agent-tab-${tab.value}`}
           className={cn('agent-tabs__tab', value === tab.value && 'agent-tabs__tab--active')}
           type="button"
           role="tab"
+          aria-controls={`agent-panel-${tab.value}`}
           aria-selected={value === tab.value}
+          tabIndex={value === tab.value ? 0 : -1}
           onClick={() => onValueChange?.(tab.value)}
         >
           {tab.label}

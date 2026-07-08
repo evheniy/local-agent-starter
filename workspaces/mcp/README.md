@@ -1,6 +1,6 @@
 # MCP Workspace
 
-Streamable HTTP MCP workspace for the local agent starter.
+Vyriy-based Streamable HTTP MCP workspace for the local agent starter.
 
 ## Behavior
 
@@ -15,6 +15,12 @@ transport, request handling, and runtime startup.
 Current tool surface:
 
 - `ping` returns `pong`
+- `list_documents` lists uploaded local documents with indexing status and
+  chunk counts
+- `search_documents` searches indexed local documents and returns matching
+  chunks
+- `ask_documents` asks a non-streaming RAG question over indexed local
+  documents
 
 ## Local Development
 

@@ -15,6 +15,7 @@ export type UploadedFile = {
   type?: string;
   status: UploadedFileStatus;
   chunksCount?: number;
+  createdAt?: string;
 };
 
 /** Raw uploaded file row returned by Postgres. */
@@ -26,6 +27,7 @@ export type UploadedFileRow = {
   type: string | null;
   status: UploadedFileStatus;
   chunks_count: number | null;
+  created_at?: Date | string | null;
 };
 
 /** RAG document persisted for an indexed uploaded file. */
@@ -66,6 +68,25 @@ export type RagIndexJobRow = {
   error: string | null;
 };
 
+/** Retrieved RAG chunk matched by vector similarity. */
+export type RetrievedRagChunk = {
+  documentTitle: string;
+  path: string;
+  chunkIndex: number;
+  score: number;
+  content: string;
+};
+
+/** Raw retrieved RAG chunk row returned by Postgres. */
+export type RetrievedRagChunkRow = {
+  document_title: string | null;
+  source: string;
+  path: string;
+  chunk_index: string | number;
+  score: string | number;
+  content: string;
+};
+
 /** Input used when persisting uploaded file metadata. */
 export type CreateUploadedFileInput = {
   name: string;
@@ -93,7 +114,7 @@ export type GetUploadedFileByIdType = (id: string) => Promise<UploadedFile | und
 export type GetUploadedFileByPathType = (path: string) => Promise<UploadedFile | undefined>;
 
 /** Lists uploaded file metadata. */
-export type ListUploadedFilesType = () => Promise<UploadedFile[]>;
+export type ListUploadedFilesType = (input?: { status?: UploadedFileStatus }) => Promise<UploadedFile[]>;
 
 /** Updates an uploaded file status. */
 export type UpdateUploadedFileStatusType = (input: {
@@ -128,6 +149,9 @@ export type CreateRagChunkType = (input: {
   embedding: number[];
   metadata?: Record<string, unknown>;
 }) => Promise<void>;
+
+/** Searches indexed RAG chunks by vector similarity. */
+export type SearchRagChunksType = (input: { embedding: number[]; limit: number }) => Promise<RetrievedRagChunk[]>;
 
 /** Enqueues an indexing job unless the file already has an active job. */
 export type EnqueueRagIndexJobType = (input: { fileId: string }) => Promise<RagIndexJob>;

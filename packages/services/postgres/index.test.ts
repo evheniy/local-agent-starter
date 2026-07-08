@@ -16,6 +16,7 @@ jest.mock('./actions.js', () => ({
   getUploadedFileByPath: jest.fn(),
   listUploadedFiles: jest.fn(),
   markUploadedFileIndexed: jest.fn(),
+  searchRagChunks: jest.fn(),
   updateUploadedFileStatus: jest.fn(),
 }));
 
@@ -51,6 +52,7 @@ describe('postgres service public API', () => {
     expect(publicApi.listUploadedFiles).toBeDefined();
     expect(publicApi.markUploadedFileIndexed).toBeDefined();
     expect(publicApi.query).toBeDefined();
+    expect(publicApi.searchRagChunks).toBeDefined();
     expect(publicApi.updateUploadedFileStatus).toBeDefined();
   });
 });

@@ -2,6 +2,16 @@ import { describe, expect, it, jest } from '@jest/globals';
 import type { APIGatewayProxyEvent } from '@vyriy/router';
 
 const apiMock = jest.fn((handler) => ({ handler }));
+const chatMock = jest.fn(() =>
+  Promise.resolve({
+    body: JSON.stringify({
+      ok: true,
+      answer: 'Answer.',
+      sources: [],
+    }),
+    statusCode: 200,
+  }),
+);
 const filesMock = jest.fn(() =>
   Promise.resolve({
     body: JSON.stringify({
@@ -30,6 +40,17 @@ const htmlMock = jest.fn(() =>
   }),
 );
 const serverMock = jest.fn();
+const staticAssetMock = jest.fn<
+  (...args: unknown[]) => Promise<{ body: string; headers: Record<string, string>; statusCode: number }>
+>(() =>
+  Promise.resolve({
+    body: 'console.log("ui");',
+    headers: {
+      'content-type': 'text/javascript; charset=utf-8',
+    },
+    statusCode: 200,
+  }),
+);
 const staticMock = jest.fn();
 const indexFileMock = jest.fn((params: unknown) => {
   void params;
@@ -64,6 +85,7 @@ jest.mock('@vyriy/handler', () => ({
 }));
 
 jest.mock('@vyriy/static', () => ({
+  useStatic: jest.fn(() => staticAssetMock),
   withStatic: jest.fn((router: RouterApi) => {
     const wrapped: RouterApi = {
       get: (...args) => {
@@ -97,6 +119,7 @@ jest.mock('@p/env', () => ({
 }));
 
 jest.mock('@p/api', () => ({
+  chat: chatMock,
   files: filesMock,
   html: htmlMock,
   indexFile: indexFileMock,
@@ -154,6 +177,25 @@ describe('workspaces/api/index.tsx', () => {
       stageVariables: null,
     }) as unknown as APIGatewayProxyEvent;
 
+  const getChatEvent = (): APIGatewayProxyEvent =>
+    ({
+      body: JSON.stringify({
+        message: 'What is indexed?',
+        limit: 5,
+      }),
+      headers: {},
+      httpMethod: 'POST',
+      isBase64Encoded: false,
+      multiValueHeaders: {},
+      multiValueQueryStringParameters: {},
+      path: '/chat',
+      pathParameters: null,
+      queryStringParameters: null,
+      requestContext: {},
+      resource: '/chat',
+      stageVariables: null,
+    }) as unknown as APIGatewayProxyEvent;
+
   const loadHandler = async (): Promise<ApiHandler> => {
     await jest.isolateModulesAsync(async () => {
       await import('./index.js');
@@ -178,6 +220,24 @@ describe('workspaces/api/index.tsx', () => {
     await handler(getEvent('/'));
 
     expect(staticMock).toHaveBeenCalledWith('/static', expect.stringMatching(/static$/u), { cache: 'static' });
+  });
+
+  it('serves built UI assets through the router', async () => {
+    const handler = await loadHandler();
+
+    await expect(handler(getEvent('/static/index.js'))).resolves.toEqual({
+      body: 'console.log("ui");',
+      headers: {
+        'content-type': 'text/javascript; charset=utf-8',
+      },
+      statusCode: 200,
+    });
+    expect(staticAssetMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/index.js',
+      }),
+      expect.anything(),
+    );
   });
 
   it('renders the local agent page for the root route', async () => {
@@ -223,6 +283,20 @@ describe('workspaces/api/index.tsx', () => {
       statusCode: 201,
     });
     expect(uploadMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes RAG chat requests', async () => {
+    const handler = await loadHandler();
+
+    await expect(handler(getChatEvent())).resolves.toEqual({
+      body: JSON.stringify({
+        ok: true,
+        answer: 'Answer.',
+        sources: [],
+      }),
+      statusCode: 200,
+    });
+    expect(chatMock).toHaveBeenCalledTimes(1);
   });
 
   it('routes file metadata reads', async () => {

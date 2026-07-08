@@ -1,5 +1,8 @@
 {
   "name": "@w/chat",
   "type": "module",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "pg": "^8.22.0"
+  }
 }

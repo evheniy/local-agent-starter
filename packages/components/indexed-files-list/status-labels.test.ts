@@ -6,8 +6,8 @@ describe('statusLabels', () => {
   it('maps every indexed file status to its display label', () => {
     expect(statusLabels).toEqual({
       uploaded: 'Uploaded',
-      indexing: 'Indexing',
-      indexed: 'Indexed',
+      indexing: 'Indexing...',
+      indexed: 'Ready',
       error: 'Error',
     });
   });

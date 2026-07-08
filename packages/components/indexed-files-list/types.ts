@@ -7,15 +7,19 @@ export type IndexedFileStatus = 'uploaded' | 'indexing' | 'indexed' | 'error';
 export type IndexedFile = {
   id: string;
   name: string;
+  path?: string;
   size?: number;
   type?: string;
   status: IndexedFileStatus;
   chunksCount?: number;
+  createdAt?: string;
 };
 
 /** Props for the IndexedFilesList component. */
 export type IndexedFilesListProps = {
   files?: IndexedFile[];
+  isRefreshing?: boolean;
+  onRefresh?: () => void | Promise<void>;
 } & ComponentProps<'section'>;
 
 /** IndexedFilesList component type. */

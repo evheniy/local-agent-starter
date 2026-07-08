@@ -1,7 +1,7 @@
 import type { ComponentProps, FC } from 'react';
 import type { ChatPanelProps } from '../chat-panel/index.js';
 import type { FileUploadPanelProps } from '../file-upload-panel/index.js';
-import type { IndexedFile } from '../indexed-files-list/index.js';
+import type { IndexedFile, IndexedFilesListProps } from '../indexed-files-list/index.js';
 import type { RetrievedChunk } from '../retrieved-chunks/index.js';
 import type { TraceEvent } from '../trace-panel/index.js';
 
@@ -13,6 +13,7 @@ export type AgentShellProps = {
   tab: AgentShellTab;
   chatPanel: ChatPanelProps;
   uploadPanel: FileUploadPanelProps;
+  filesPanel?: Pick<IndexedFilesListProps, 'isRefreshing' | 'onRefresh'>;
   chunks?: RetrievedChunk[];
   files?: IndexedFile[];
   traceEvents?: TraceEvent[];

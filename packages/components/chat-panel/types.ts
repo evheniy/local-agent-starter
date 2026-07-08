@@ -1,11 +1,31 @@
 import type { ComponentProps, FC, SubmitEventHandler } from 'react';
 
+export type ChatSource = {
+  documentTitle?: string;
+  path?: string;
+  chunkIndex?: number;
+  score?: number;
+  contentPreview?: string;
+};
+
+export type ChatMessage = {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  sources?: ChatSource[];
+  status?: 'streaming' | 'done' | 'error' | 'cancelled';
+  error?: string;
+};
+
 /** Props for the ChatPanel component. */
 export type ChatPanelProps = {
   question: string;
   answer?: string;
   canSubmit?: boolean;
+  emptyState?: string;
+  hasIndexedFiles?: boolean;
   isLoading?: boolean;
+  messages?: ChatMessage[];
   error?: string;
   onQuestionChange?: (question: string) => void;
   onSubmit?: () => void | Promise<void>;

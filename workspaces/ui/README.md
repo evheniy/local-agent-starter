@@ -6,12 +6,17 @@ Client-rendered workspace for the local agent starter application.
 
 The UI entry point mounts `AgentShell` into `#root`.
 
-The UI has two modes:
+The Local RAG UI provides:
 
-1. Chat - ask questions and observe the visible application pipeline.
-2. Upload - select local files that will later be sent to the ingest/indexing API.
+- Document upload through `POST /upload?filename=<name>`.
+- Uploaded file status from `GET /files`.
+- Automatic refresh while files are uploaded or indexing.
+- Streaming RAG chat through `POST /chat/stream`.
+- Source previews under assistant answers.
 
-The trace panel shows application-level steps, not hidden model thoughts.
+The layout uses a documents panel for upload/status and a chat panel for
+streaming answers. The trace panel describes visible application-level steps,
+not hidden model thoughts.
 
 It imports shared component styles from:
 
@@ -34,13 +39,25 @@ Default local values:
 - `UI_PORT=3001`
 - `UI=http://localhost:3001`
 - `API=http://localhost:3000`
+- `CHAT=http://localhost:3002`
 
-Run the full local application when the API and UI bundle should both be
-available:
+Run the full local application when the API, chat service, indexer, Postgres,
+and UI bundle should all be available:
 
 ```bash
 yarn dev
 ```
+
+Manual local RAG UI test:
+
+1. Start Postgres, API, indexer, chat, UI, a local embedding model, and a local
+   chat LLM.
+2. Open `http://localhost:3001`.
+3. Upload `notes.md`.
+4. Verify the file appears as Uploaded or Indexing.
+5. Wait until the status is Ready.
+6. Ask `What does this document say?`.
+7. Verify the assistant streams an answer and sources appear under it.
 
 ## Build
 
@@ -57,4 +74,5 @@ the API Docker image can serve SSR HTML and static assets together.
 yarn test:jest workspaces/ui
 ```
 
-The tests verify that the entry point mounts into `#root` and renders the local agent shell.
+The tests verify API helpers, upload/status hooks, streaming chat state, and
+that the entry point renders the local agent shell.

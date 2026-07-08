@@ -53,6 +53,12 @@
   opacity: 0.55;
 }
 
+.chat-panel__notice {
+  margin: 0;
+  color: #92400e;
+  line-height: 1.5;
+}
+
 .chat-panel__error {
   margin: 0;
   color: #b91c1c;
@@ -75,4 +81,135 @@
 .chat-panel__answer-body {
   color: #4b5563;
   line-height: 1.5;
+}
+
+.chat-panel__messages {
+  min-height: 22rem;
+  padding: 0.25rem;
+  overflow: auto;
+}
+
+.chat-panel__message-list {
+  display: grid;
+  gap: 0.875rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chat-panel__message {
+  display: grid;
+  gap: 0.5rem;
+  max-width: min(100%, 52rem);
+  padding: 0.875rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #f9fafb;
+}
+
+.chat-panel__message--user {
+  justify-self: end;
+  background: #eef6ff;
+}
+
+.chat-panel__message--assistant {
+  justify-self: start;
+}
+
+.chat-panel__message-role,
+.chat-panel__message-body,
+.chat-panel__message-status,
+.chat-panel__message-error,
+.chat-panel__empty {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.chat-panel__message-role {
+  color: #374151;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.chat-panel__message-body {
+  color: #111827;
+  white-space: pre-wrap;
+}
+
+.chat-panel__message-status {
+  color: #1d4ed8;
+  font-size: 0.875rem;
+}
+
+.chat-panel__message-error {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.chat-panel__empty {
+  padding: 1rem;
+  border: 1px dashed #cbd5e1;
+  border-radius: 0.5rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+.chat-panel__sources {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.chat-panel__sources-title {
+  margin: 0;
+  color: #374151;
+  font-size: 0.875rem;
+  letter-spacing: 0;
+}
+
+.chat-panel__sources-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.chat-panel__source {
+  color: #4b5563;
+}
+
+.chat-panel__source-header {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.chat-panel__source-title {
+  color: #111827;
+  font-weight: 700;
+}
+
+.chat-panel__source-score {
+  flex: 0 0 auto;
+  color: #047857;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.chat-panel__source-meta,
+.chat-panel__source-preview {
+  margin: 0.25rem 0 0;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+
+.chat-panel__source-meta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.8125rem;
+}
+
+.chat-panel__source-preview {
+  color: #6b7280;
+  font-size: 0.875rem;
 }

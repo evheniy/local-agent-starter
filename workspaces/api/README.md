@@ -8,6 +8,7 @@ The API starts an `@vyriy/server` handler and serves:
 
 - `GET /` returns an HTML document with a server-rendered `AgentShell`.
 - `GET /files` returns persisted uploaded file metadata from Postgres.
+- `POST /chat` answers a JSON RAG chat request over indexed uploaded files.
 - `POST /upload?filename=name.ext` writes a raw uploaded file into `DOCS_DIR`
   persists metadata in `rag_files`, and enqueues a background indexing job.
 - `POST /files/:id/index` is a debug/retry endpoint that indexes an uploaded
@@ -45,6 +46,14 @@ Run the background indexer locally with:
 yarn dev:indexer
 ```
 
+Ask over indexed files with:
+
+```bash
+curl -X POST "http://localhost:3000/chat" \
+  -H "content-type: application/json" \
+  -d '{"message":"What does notes.md say?","limit":5}'
+```
+
 Embedding settings:
 
 ```env
@@ -53,6 +62,14 @@ EMBEDDING_BASE_URL=http://host.docker.internal:1234
 EMBEDDING_MODEL=text-embedding-qwen3-embedding-0.6b
 EMBEDDING_DIMENSIONS=1024
 INDEXER_POLL_MS=5000
+```
+
+Chat completion settings:
+
+```env
+LLM_PROVIDER=lmstudio
+LLM_BASE_URL=http://host.docker.internal:1234/v1
+LLM_MODEL=qwen2.5-coder-7b-instruct
 ```
 
 ## Local Development

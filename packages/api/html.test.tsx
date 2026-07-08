@@ -34,8 +34,8 @@ describe('html handler', () => {
     expect(response.body).toContain('href="http://localhost:3002/main.css"');
     expect(response.body).toContain('<div id="root" rendered>');
     expect(response.body).toContain('Local Agent Starter');
-    expect(response.body).toContain('Application Trace');
-    expect(response.body).toContain('Retrieved Chunks');
+    expect(response.body).toContain('Documents');
+    expect(response.body).toContain('No documents yet. Upload a file to start local RAG.');
     expect(response.body).toMatch(/src\s*=\s*"http:\/\/localhost:3002\/index\.js"/);
   });
 

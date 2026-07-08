@@ -1,6 +1,7 @@
 # AgentShell
 
-`AgentShell` composes the local agent app layout with Chat and Upload tabs.
+`AgentShell` composes the local RAG app layout with a documents panel and a
+chat panel. Tabs remain available for small screens.
 
 ## Usage
 
@@ -19,6 +20,7 @@ export type AgentShellProps = {
   tab: AgentShellTab;
   chatPanel: ChatPanelProps;
   uploadPanel: FileUploadPanelProps;
+  filesPanel?: Pick<IndexedFilesListProps, 'isRefreshing' | 'onRefresh'>;
   chunks?: RetrievedChunk[];
   files?: IndexedFile[];
   traceEvents?: TraceEvent[];

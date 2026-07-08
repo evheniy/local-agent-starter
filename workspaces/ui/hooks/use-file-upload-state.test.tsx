@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { useFileUploadState } from './use-file-upload-state.js';
 
 const createResponse = ({
-  body = '',
+  body = {},
   ok = true,
   status = 200,
 }: {
@@ -13,81 +13,87 @@ const createResponse = ({
   status?: number;
 } = {}) =>
   ({
-    headers: {
-      get: () => (body ? 'application/json' : null),
-    },
-    json: () => Promise.resolve(body),
+    json: jest.fn(() => Promise.resolve(body)),
     ok,
     status,
-    statusText: '',
-    text: () => Promise.resolve(typeof body === 'string' ? body : JSON.stringify(body)),
-    type: 'basic',
-    url: '',
   }) as unknown as Response;
 
-const createFilesResponse = () =>
-  createResponse({
-    body: {
-      files: [
-        {
-          id: 'stored-notes',
-          name: 'stored-notes.md',
-          path: 'docs/stored-notes.md',
-          size: 12,
-          type: 'text/markdown',
-          status: 'uploaded',
-        },
-      ],
-    },
-  });
+const storedFile = {
+  id: 'stored-notes',
+  name: 'stored-notes.md',
+  path: 'docs/stored-notes.md',
+  size: 12,
+  type: 'text/markdown',
+  status: 'uploaded' as const,
+};
 
-const createUploadResponse = () =>
-  createResponse({
-    body: {
-      file: {
-        id: 'server-notes',
-        name: 'notes.md',
-        path: 'docs/notes.md',
-        size: 5,
-        type: 'text/markdown',
-        status: 'uploaded',
-      },
-    },
-  });
+const serverFile = {
+  id: 'server-notes',
+  name: 'notes.md',
+  path: 'docs/notes.md',
+  size: 5,
+  type: 'text/markdown',
+  status: 'uploaded' as const,
+};
 
 describe('useFileUploadState', () => {
   let previousApi: string | undefined;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     previousApi = process.env.API;
     process.env.API = 'http://localhost:3000';
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     jest.restoreAllMocks();
     Reflect.deleteProperty(globalThis, 'fetch');
 
-    if (typeof previousApi === 'string') {
+    if (previousApi === undefined) {
+      delete process.env.API;
+    } else {
       process.env.API = previousApi;
-
-      return;
     }
-
-    delete process.env.API;
   });
 
-  it('uploads the selected file and records it as uploaded', async () => {
+  it('loads and refreshes files', async () => {
     const fetchMock = jest
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(createFilesResponse())
-      .mockResolvedValueOnce(createUploadResponse());
-    const file = new File(['hello'], 'notes.md', { type: 'text/markdown' });
-    const { result } = renderHook(() => useFileUploadState());
+      .mockResolvedValueOnce(createResponse({ body: { files: [storedFile] } }))
+      .mockResolvedValueOnce(createResponse({ body: { files: [{ ...storedFile, status: 'indexed' }] } }));
 
     Object.defineProperty(globalThis, 'fetch', {
       configurable: true,
       value: fetchMock,
     });
+
+    const { result } = renderHook(() => useFileUploadState());
+
+    await waitFor(() => expect(result.current.files[0]?.id).toBe('stored-notes'));
+
+    await act(async () => {
+      await result.current.syncFiles();
+    });
+
+    expect(result.current.files[0]?.status).toBe('indexed');
+    expect(result.current.isRefreshing).toBe(false);
+  });
+
+  it('uploads the selected file and refreshes files', async () => {
+    const file = new File(['hello'], 'notes.md', { type: 'text/markdown' });
+    const fetchMock = jest
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(createResponse({ body: { files: [storedFile] } }))
+      .mockResolvedValueOnce(createResponse({ body: { file: serverFile } }))
+      .mockResolvedValueOnce(createResponse({ body: { files: [serverFile] } }));
+
+    Object.defineProperty(globalThis, 'fetch', {
+      configurable: true,
+      value: fetchMock,
+    });
+
+    const { result } = renderHook(() => useFileUploadState());
 
     await waitFor(() => expect(result.current.files[0]?.id).toBe('stored-notes'));
 
@@ -99,68 +105,31 @@ describe('useFileUploadState', () => {
       await result.current.uploadFile();
     });
 
-    expect(fetchMock).toHaveBeenCalledWith('http://localhost:3000/files', expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith(
       'http://localhost:3000/upload?filename=notes.md',
       expect.objectContaining({
         method: 'POST',
-        headers: {
-          'content-type': 'text/markdown',
-        },
         body: file,
       }),
     );
-    await waitFor(() => expect(result.current.status).toBe('success'));
-    expect(result.current.files[0]).toMatchObject({
-      id: 'server-notes',
-      name: 'notes.md',
-      size: 5,
-      type: 'text/markdown',
-      status: 'uploaded',
-    });
+    expect(result.current.status).toBe('success');
+    expect(result.current.file).toBeUndefined();
+    expect(result.current.files[0]?.id).toBe('server-notes');
   });
 
-  it('stores an error when upload fails', async () => {
-    const fetchMock = jest
-      .fn<typeof fetch>()
-      .mockResolvedValueOnce(createFilesResponse())
-      .mockResolvedValueOnce(createResponse({ ok: false, status: 500 }));
+  it('stores friendly upload errors', async () => {
     const file = new File(['hello'], 'notes.md', { type: 'text/markdown' });
-    const { result } = renderHook(() => useFileUploadState());
-
-    Object.defineProperty(globalThis, 'fetch', {
-      configurable: true,
-      value: fetchMock,
-    });
-
-    await waitFor(() => expect(result.current.files[0]?.id).toBe('stored-notes'));
-
-    act(() => {
-      result.current.setFile(file);
-    });
-
-    await act(async () => {
-      await result.current.uploadFile();
-    });
-
-    expect(result.current.status).toBe('error');
-    expect(result.current.error).toBe('Request failed with status 500');
-    expect(result.current.files).toHaveLength(1);
-    expect(result.current.files[0]?.id).toBe('stored-notes');
-  });
-
-  it('uses default content type and fallback error text', async () => {
     const fetchMock = jest
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(createFilesResponse())
-      .mockRejectedValueOnce('network down');
-    const file = new File(['hello'], 'notes.bin');
-    const { result } = renderHook(() => useFileUploadState());
+      .mockResolvedValueOnce(createResponse({ body: { files: [storedFile] } }))
+      .mockResolvedValueOnce(createResponse({ ok: false, status: 409 }));
 
     Object.defineProperty(globalThis, 'fetch', {
       configurable: true,
       value: fetchMock,
     });
+
+    const { result } = renderHook(() => useFileUploadState());
 
     await waitFor(() => expect(result.current.files[0]?.id).toBe('stored-notes'));
 
@@ -172,55 +141,35 @@ describe('useFileUploadState', () => {
       await result.current.uploadFile();
     });
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:3000/upload?filename=notes.bin',
-      expect.objectContaining({
-        method: 'POST',
-        headers: {
-          'content-type': 'application/octet-stream',
-        },
-        body: file,
-      }),
-    );
     expect(result.current.status).toBe('error');
-    expect(result.current.error).toBe('Upload failed.');
+    expect(result.current.error).toBe('This file is already uploaded.');
+    expect(result.current.files).toHaveLength(1);
   });
 
-  it('does not upload without a selected file', async () => {
-    const fetchMock = jest.fn<typeof fetch>().mockResolvedValue(createFilesResponse());
-    const { result } = renderHook(() => useFileUploadState());
+  it('does not upload without a selected file or while uploading', async () => {
+    const file = new File(['hello'], 'notes.md', { type: 'text/markdown' });
+    const fetchMock = jest
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(createResponse({ body: { files: [storedFile] } }))
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(() => resolve(createResponse({ body: { file: serverFile } })), 10);
+          }),
+      );
 
     Object.defineProperty(globalThis, 'fetch', {
       configurable: true,
       value: fetchMock,
     });
+
+    const { result } = renderHook(() => useFileUploadState());
 
     await act(async () => {
       await result.current.uploadFile();
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith('http://localhost:3000/files', expect.any(Object));
-    expect(result.current.status).toBe('idle');
-  });
-
-  it('does not start another upload while uploading', async () => {
-    const fetchMock = jest
-      .fn<typeof fetch>()
-      .mockResolvedValueOnce(createFilesResponse())
-      .mockImplementationOnce(
-        () =>
-          new Promise((resolve) => {
-            setTimeout(() => resolve(createUploadResponse()), 10);
-          }),
-      );
-    const file = new File(['hello'], 'notes.md', { type: 'text/markdown' });
-    const { result } = renderHook(() => useFileUploadState());
-
-    Object.defineProperty(globalThis, 'fetch', {
-      configurable: true,
-      value: fetchMock,
-    });
 
     await waitFor(() => expect(result.current.files[0]?.id).toBe('stored-notes'));
 
@@ -240,26 +189,38 @@ describe('useFileUploadState', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it('stores an error when file metadata sync fails', async () => {
-    const fetchMock = jest.fn<typeof fetch>().mockRejectedValue(new Error('metadata down'));
-    const { result } = renderHook(() => useFileUploadState());
+  it('polls while files are not terminal', async () => {
+    const fetchMock = jest
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(createResponse({ body: { files: [storedFile] } }))
+      .mockResolvedValueOnce(createResponse({ body: { files: [{ ...storedFile, status: 'indexed' }] } }));
 
     Object.defineProperty(globalThis, 'fetch', {
       configurable: true,
       value: fetchMock,
     });
 
-    await waitFor(() => expect(result.current.error).toBe('metadata down'));
+    renderHook(() => useFileUploadState());
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+      await Promise.resolve();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it('stores fallback error text when file metadata sync fails without an error object', async () => {
+  it('stores sync fallback errors', async () => {
     const fetchMock = jest.fn<typeof fetch>().mockRejectedValue('metadata down');
-    const { result } = renderHook(() => useFileUploadState());
 
     Object.defineProperty(globalThis, 'fetch', {
       configurable: true,
       value: fetchMock,
     });
+
+    const { result } = renderHook(() => useFileUploadState());
 
     await waitFor(() => expect(result.current.error).toBe('Could not load uploaded files.'));
   });
