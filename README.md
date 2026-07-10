@@ -1,9 +1,65 @@
 # Local Agent Starter
 
-Yarn workspace fullstack starter for a local RAG/agent application. The project
-contains a server-rendered API, a browser UI bundle, a streaming chat service, a
-background indexer worker, a small MCP service, shared package logic, Storybook
-documentation, and Docker Compose infrastructure for local development.
+Build and inspect a complete local RAG loop without hiding it behind a large
+agent framework. Local Agent Starter uploads text-like documents, indexes them
+in Postgres/pgvector, retrieves grounded context, and streams answers from
+models served by LM Studio.
+
+![Grounded answer with source previews](docs/screenshots/demo-07-answer.png)
+
+## Features
+
+- raw document upload with persisted status
+- automatic background indexing queue
+- text chunking and OpenAI-compatible embeddings
+- Postgres + pgvector cosine retrieval
+- non-streaming API and streaming SSE RAG chat
+- browser Chat and Upload experience with source previews
+- visible application-level trace events (not hidden model reasoning)
+- read-only MCP Streamable HTTP tools
+- Docker Compose demo and Storybook documentation
+
+## Architecture at a glance
+
+The browser uploads and reads status through the API, while streaming questions
+go to the chat service. The indexer converts queued uploads into embedded chunks
+in pgvector. Chat and MCP reuse the same embedding, retrieval, Postgres, and RAG
+services. See the [architecture guide](docs/architecture.md) for the complete
+runtime flow and boundaries.
+
+> **Local development starter:** this project has no authentication,
+> authorization, production security hardening, or document sandboxing. Do not
+> expose it to untrusted networks or treat it as production-ready.
+
+## Five-minute Docker quick start
+
+Prerequisites: Docker with Compose and LM Studio with one chat model and one
+embedding model. Start with the detailed [LM Studio setup](docs/lm-studio.md)
+if the models are not already serving on port 1234.
+
+```bash
+cp .env.example .env
+curl http://localhost:1234/v1/models
+docker compose up -d --build
+```
+
+Open `http://localhost:3000`, upload `docs/concepts.md`, wait for **Ready**, and
+ask:
+
+```text
+According to concepts.md, what is an agent in this project? Answer briefly.
+```
+
+The answer should stream with source previews. For health checks and expected
+screens, follow the [reproducible demo](docs/demo.md). The separate
+`http://localhost:3001` URL is only the UI workspace development server.
+
+Start from the [documentation index](docs/README.md) for guided reading paths,
+or go directly to [troubleshooting](docs/troubleshooting.md).
+
+This is a Yarn workspace fullstack starter with server-rendered API, browser UI,
+streaming chat, background indexer, MCP service, shared packages, Storybook,
+and Docker Compose infrastructure.
 
 ## Setup
 
@@ -19,8 +75,15 @@ The project uses Yarn `4.17.0`, Node `>=24.0.0`, and workspaces under
 Start all local workspace dev servers together:
 
 ```bash
+EMBEDDING_BASE_URL=http://localhost:1234 \
+LLM_BASE_URL=http://localhost:1234/v1 \
 yarn dev
 ```
+
+The workspace processes run on the host, so they reach host-side LM Studio
+through `localhost`. The Docker defaults in `.env` use
+`host.docker.internal` because container-local `localhost` points back to the
+container.
 
 Start individual workspaces:
 
@@ -317,9 +380,11 @@ practical guidance for evolving a project on top of it:
 
 Project-specific notes live in `docs/`:
 
+- [Documentation index](docs/README.md)
 - [Architecture](docs/architecture.md)
 - [Concepts](docs/concepts.md)
 - [Demo](docs/demo.md)
 - [LM Studio](docs/lm-studio.md)
 - [MCP](docs/mcp.md)
 - [pgvector](docs/pgvector.md)
+- [Troubleshooting](docs/troubleshooting.md)

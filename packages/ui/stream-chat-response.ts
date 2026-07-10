@@ -33,12 +33,25 @@ export const streamChatResponse = async ({ message, limit, handlers, signal }: S
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
+  let receivedDone = false;
+  const streamHandlers = {
+    ...handlers,
+    onDone: () => {
+      receivedDone = true;
+      handlers.onDone?.();
+    },
+  };
 
   while (true) {
     const { done, value } = await reader.read();
 
     buffer += decoder.decode(value, { stream: !done });
-    buffer = processBufferedEvents(buffer, handlers);
+    buffer = processBufferedEvents(buffer, streamHandlers);
+
+    if (receivedDone) {
+      await reader.cancel();
+      break;
+    }
 
     if (done) {
       break;
@@ -48,6 +61,6 @@ export const streamChatResponse = async ({ message, limit, handlers, signal }: S
   const finalEvent = parseEventBlock(buffer.trim());
 
   if (finalEvent) {
-    dispatchStreamEvent(finalEvent, handlers);
+    dispatchStreamEvent(finalEvent, streamHandlers);
   }
 };

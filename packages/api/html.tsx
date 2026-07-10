@@ -17,10 +17,20 @@ export const html: Handler = () => ({
         <AgentShell
           tab="chat"
           chatPanel={{
-            answer: 'This placeholder answer will later be streamed from the local chat service.',
-            question: 'What does this project already know about pgvector?',
+            answer: '',
+            canSubmit: false,
+            hasIndexedFiles: false,
+            isLoading: false,
+            messages: [],
+            question: '',
           }}
-          uploadPanel={{}}
+          files={[]}
+          filesPanel={{
+            /* c8 ignore next -- SSR markup parity only */
+            onRefresh: () => undefined,
+          }}
+          traceEvents={[]}
+          uploadPanel={{ status: 'idle' }}
         />,
       )}</div>`,
       script: `<script defer="defer" src="${getUi()}/index.js"></script>`,

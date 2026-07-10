@@ -19,7 +19,7 @@ services:
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-lmstudio}
       EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://host.docker.internal:1234}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-qwen3-embedding-0.6b}
-      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-4096}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-1024}
       LLM_PROVIDER: ${LLM_PROVIDER:-lmstudio}
       LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:1234/v1}
       LLM_MODEL: ${LLM_MODEL:-qwen2.5-coder-7b-instruct}
@@ -53,7 +53,7 @@ services:
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-lmstudio}
       EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://host.docker.internal:1234}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-qwen3-embedding-0.6b}
-      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-4096}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-1024}
       LLM_PROVIDER: ${LLM_PROVIDER:-lmstudio}
       LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:1234/v1}
       LLM_MODEL: ${LLM_MODEL:-qwen2.5-coder-7b-instruct}
@@ -85,7 +85,7 @@ services:
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-lmstudio}
       EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://host.docker.internal:1234}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-qwen3-embedding-0.6b}
-      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-4096}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-1024}
     volumes:
       - ./docker/docs:/app/docs
     depends_on:
@@ -113,7 +113,7 @@ services:
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-lmstudio}
       EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://host.docker.internal:1234}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-qwen3-embedding-0.6b}
-      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-4096}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-1024}
       LLM_PROVIDER: ${LLM_PROVIDER:-lmstudio}
       LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:1234/v1}
       LLM_MODEL: ${LLM_MODEL:-qwen2.5-coder-7b-instruct}

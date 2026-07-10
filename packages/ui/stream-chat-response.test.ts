@@ -17,6 +17,14 @@ const createBody = (chunks: string[]): ReadableStream<Uint8Array> =>
     },
   });
 
+const createOpenBody = (chunk: string, onCancel: () => void) =>
+  new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(encoder.encode(chunk));
+    },
+    cancel: onCancel,
+  });
+
 const createResponse = ({
   body = createBody([]),
   ok = true,
@@ -127,6 +135,26 @@ describe('streamChatResponse', () => {
     });
 
     expect(onDelta).toHaveBeenCalledWith('tail');
+  });
+
+  it('stops reading when a done event arrives before the connection closes', async () => {
+    const onCancel = jest.fn<() => void>();
+    const onDone = jest.fn();
+    const fetchMock = jest.fn<typeof fetch>().mockResolvedValue(
+      createResponse({
+        body: createOpenBody('event: done\ndata: {"ok":true}\n\n', onCancel),
+      }),
+    );
+
+    Object.defineProperty(globalThis, 'fetch', {
+      configurable: true,
+      value: fetchMock,
+    });
+
+    await streamChatResponse({ message: 'What?', handlers: { onDone } });
+
+    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   it('throws response and missing body errors', async () => {
